@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Gestor de Reservas — Islandia Sep 2026</title>
+<style>
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #f7f6f3;
+  color: #1a1a1a;
+  margin: 0;
+  padding: 20px;
+  line-height: 1.5;
+}
+.container { max-width: 1200px; margin: 0 auto; }
+header { margin-bottom: 24px; }
+h1 { color: #1a3a52; margin: 0 0 4px 0; font-size: 24px; }
+.subtitle { color: #666; font-size: 14px; }
+.flag { font-size: 22px; }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; align-items: center; }
+button {
+  font-family: inherit; font-size: 13px; padding: 8px 14px;
+  border-radius: 6px; border: 1px solid #d0d0d0; background: #fff;
+  cursor: pointer; transition: all 0.15s;
+}
+button:hover { background: #f0f0ee; border-color: #999; }
+button.primary { background: #1a3a52; color: #fff; border-color: #1a3a52; }
+button.primary:hover { background: #285573; }
+button.danger { color: #b00020; }
+button.success { background: #2d7a3e; color: #fff; border-color: #2d7a3e; }
+button.success:hover { background: #3a9450; }
+
+.summary {
+  background: #fff; border: 1px solid #e5e5e5; border-radius: 8px;
+  padding: 16px; margin-bottom: 16px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px;
+}
+.stat-label { color: #666; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-value { font-size: 22px; font-weight: 600; color: #1a3a52; margin-top: 2px; }
+.stat-sub { font-size: 12px; color: #888; }
+
+.filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.filter-bar select, .filter-bar input {
+  padding: 6px 10px; border-radius: 6px; border: 1px solid #d0d0d0;
+  font-size: 13px; background: #fff;
+}
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
+.card {
+  background: #fff; border: 1px solid #e5e5e5; border-radius: 10px;
+  padding: 14px; position: relative; transition: all 0.15s;
+}
+.card:hover { border-color: #1a3a52; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.card-tipo { display: inline-block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 8px; border-radius: 4px; font-weight: 600; }
+.tipo-Vuelo { background: #e3f2fd; color: #0d47a1; }
+.tipo-Alojamiento { background: #f3e5f5; color: #6a1b9a; }
+.tipo-Auto { background: #fff8e1; color: #b85c00; }
+.tipo-Tour { background: #e8f5e9; color: #1b5e20; }
+.tipo-Comida { background: #ffebee; color: #b71c1c; }
+.tipo-Otro { background: #eceff1; color: #37474f; }
+
+.card-titulo { font-weight: 600; font-size: 16px; margin: 4px 0; color: #1a1a1a; }
+.card-fecha { color: #555; font-size: 13px; margin-bottom: 6px; }
+.card-row { font-size: 13px; color: #444; margin: 3px 0; display: flex; gap: 6px; }
+.card-row strong { color: #1a1a1a; min-width: 70px; }
+.card-img { max-width: 100%; max-height: 140px; border-radius: 6px; margin: 8px 0; cursor: pointer; }
+.card-img:hover { opacity: 0.85; }
+.card-actions { display: flex; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f0f0f0; }
+.card-actions button { font-size: 12px; padding: 5px 10px; }
+.card-link { color: #1a3a52; font-size: 12px; text-decoration: none; word-break: break-all; }
+.card-link:hover { text-decoration: underline; }
+
+.empty { text-align: center; padding: 40px; color: #888; background: #fff; border: 2px dashed #d0d0d0; border-radius: 10px; }
+
+.modal-bg {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); display: none;
+  align-items: flex-start; justify-content: center;
+  padding: 20px; z-index: 100; overflow-y: auto;
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: #fff; border-radius: 12px; padding: 24px;
+  width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto;
+}
+.modal h2 { margin-top: 0; color: #1a3a52; }
+.form-row { margin-bottom: 12px; }
+.form-row label { display: block; font-size: 12px; color: #555; font-weight: 600; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
+.form-row input, .form-row select, .form-row textarea {
+  width: 100%; padding: 8px 10px; border-radius: 6px;
+  border: 1px solid #d0d0d0; font-size: 14px; font-family: inherit; background: #fff;
+}
+.form-row textarea { resize: vertical; min-height: 60px; }
+.form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+.image-preview { max-width: 100%; max-height: 200px; border-radius: 6px; margin-top: 8px; }
+
+.lightbox {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.9); display: none;
+  align-items: center; justify-content: center; z-index: 200; cursor: zoom-out;
+}
+.lightbox.open { display: flex; }
+.lightbox img { max-width: 95vw; max-height: 95vh; }
+
+.help-block {
+  background: #fffbea; border-left: 4px solid #f9a825;
+  padding: 10px 14px; border-radius: 4px; font-size: 13px; color: #4d3800; margin-bottom: 16px;
+}
+.help-block strong { color: #1a1a1a; }
+.help-block code { background: #fff; padding: 1px 4px; border-radius: 3px; font-size: 12px; }
+
+footer { text-align: center; color: #888; font-size: 12px; margin-top: 30px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Gestor de Reservas — Islandia 8 al 23 Sep 2026</h1>
+    <div class="subtitle">Cargá cada reserva en ISK / USD / EUR. Después exportás <code>.ics</code> a Google Calendar y sincronizás la planilla de gastos.</div>
+  </header>
+
+  <div class="help-block">
+    <strong>Cómo funciona:</strong> todo se guarda en el navegador (localStorage). Click en <strong>+ Nueva reserva</strong>, completá los campos eligiendo la moneda (ISK / USD / EUR — FX <code>138 ISK/USD</code>, <code>150 ISK/EUR</code>) y opcionalmente subí una foto de la confirmación. El rango de fechas está fijo entre el 8 y el 23 de septiembre de 2026. Después usá <strong>Exportar .ics</strong> para subir el cronograma a los dos Gmail (Calendar → Configuración → Importar y exportar). Para sincronizar la planilla de gastos lo más seguro es <strong>JSON para Claude</strong>.
+  </div>
+
+  <div class="toolbar">
+    <button class="primary" onclick="openModal()">+ Nueva reserva</button>
+    <button class="success" onclick="exportIcs()">Exportar .ics (Google Calendar)</button>
+    <button onclick="copyExcel()">Copiar para Excel</button>
+    <button onclick="copyJson()">JSON para Claude</button>
+    <button onclick="exportJson()">Backup (JSON)</button>
+    <button onclick="document.getElementById('importInput').click()">Restaurar backup</button>
+    <input type="file" id="importInput" accept=".json" style="display:none" onchange="importJson(event)">
+    <button class="danger" onclick="clearAll()">Borrar todo</button>
+  </div>
+
+  <div class="summary" id="summary"></div>
+
+  <div class="filter-bar">
+    <select id="filterTipo" onchange="render()">
+      <option value="">Todos los tipos</option>
+      <option value="Vuelo">Vuelos</option>
+      <option value="Alojamiento">Alojamientos</option>
+      <option value="Auto">Auto</option>
+      <option value="Tour">Tours / Actividades</option>
+      <option value="Comida">Comidas</option>
+      <option value="Otro">Otros</option>
+    </select>
+    <input type="text" id="filterText" placeholder="Buscar..." oninput="render()">
+    <select id="sortBy" onchange="render()">
+      <option value="fechaInicio">Ordenar por fecha</option>
+      <option value="tipo">Ordenar por tipo</option>
+      <option value="montoIsk">Ordenar por monto</option>
+    </select>
+  </div>
+
+  <div id="cards" class="cards"></div>
+</div>
+
+<div id="modalBg" class="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h2 id="modalTitle">Nueva reserva</h2>
+    <form id="form" onsubmit="saveReserva(event)">
+      <input type="hidden" id="f_id">
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>Tipo *</label>
+          <select id="f_tipo" required>
+            <option value="Vuelo">Vuelo</option>
+            <option value="Alojamiento">Alojamiento</option>
+            <option value="Auto">Auto / Transfer</option>
+            <option value="Tour" selected>Tour / Actividad</option>
+            <option value="Comida">Comida (reservada)</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Título *</label>
+          <input type="text" id="f_titulo" required placeholder="Ej: Sky Lagoon">
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>Fecha y hora inicio (Reykjavík) *</label>
+          <input type="datetime-local" id="f_fechaInicio" required min="2026-09-08T00:00" max="2026-09-23T23:59">
+        </div>
+        <div class="form-row">
+          <label>Fecha y hora fin</label>
+          <input type="datetime-local" id="f_fechaFin" min="2026-09-08T00:00" max="2026-09-23T23:59">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>Ubicación / Dirección</label>
+        <input type="text" id="f_ubicacion" placeholder="Ej: Vesturvör 44-48, Kópavogur">
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>Código de reserva</label>
+          <input type="text" id="f_codigo" placeholder="Ej: ABC123">
+        </div>
+        <div class="form-row">
+          <label>Link / URL</label>
+          <input type="url" id="f_link" placeholder="https://...">
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>Monto y moneda</label>
+          <div style="display:flex;gap:6px;">
+            <input type="number" id="f_monto" step="0.01" placeholder="12990" style="flex:1;min-width:0;">
+            <select id="f_moneda" style="width:90px;flex-shrink:0;">
+              <option value="ISK">ISK</option>
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Pagó *</label>
+          <select id="f_pago" required>
+            <option value="Giancarlo">Giancarlo</option>
+            <option value="Persona2">Persona 2 (mnpresno)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>División gasto</label>
+          <select id="f_division">
+            <option value="50/50">50/50</option>
+            <option value="Solo P1">Solo Giancarlo</option>
+            <option value="Solo P2">Solo Persona 2</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Participantes</label>
+          <select id="f_participantes">
+            <option value="Ambos">Ambos</option>
+            <option value="Giancarlo">Solo Giancarlo</option>
+            <option value="Persona2">Solo Persona 2</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>Notas</label>
+        <textarea id="f_notas" placeholder="Ej: Llegar 15 min antes..."></textarea>
+      </div>
+
+      <div class="form-row">
+        <label>Imagen / captura de la confirmación</label>
+        <input type="file" id="f_imagen" accept="image/*" onchange="previewImage(event)">
+        <img id="imagePreview" class="image-preview" style="display:none">
+        <input type="hidden" id="f_imagen_data">
+        <button type="button" id="btnRemoveImg" style="display:none; margin-top:6px; font-size:12px;" onclick="removeImage()">Quitar imagen</button>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" onclick="closeModal()">Cancelar</button>
+        <button type="submit" class="primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="lightbox" class="lightbox" onclick="this.classList.remove('open')">
+  <img id="lightboxImg">
+</div>
+
+<footer>Islandia Sep 2026 · Gestor de reservas · Datos guardados localmente en este navegador</footer>
+
+<script>
+const STORAGE_KEY = 'islandia_reservas_v1';
+const FX_USD = 138;
+const FX_EUR = 150;
+const TRIP_START = '2026-09-08T00:00';
+const TRIP_END   = '2026-09-23T23:59';
+
+let reservas = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+
+let _migrated = false;
+reservas.forEach(r => {
+  if (r.moneda === undefined) {
+    r.moneda = 'ISK';
+    r.monto = (r.montoIsk !== undefined) ? r.montoIsk : (r.monto || 0);
+    delete r.montoIsk;
+    _migrated = true;
+  }
+});
+
+if (reservas.length === 0) {
+  reservas = [{
+    id: 'sky-lagoon-22-sep',
+    tipo: 'Tour',
+    titulo: 'Sky Lagoon',
+    fechaInicio: '2026-09-22T18:00',
+    fechaFin: '2026-09-22T20:00',
+    ubicacion: 'Vesturvör 44-48, Kópavogur',
+    codigo: '',
+    link: 'https://skylagoon.com',
+    moneda: 'ISK',
+    monto: 12990,
+    pago: 'Giancarlo',
+    division: '50/50',
+    participantes: 'Ambos',
+    notas: 'PLACEHOLDER — verificar precio, hora y código real.',
+    imagen: '',
+    creadoEn: new Date().toISOString()
+  }];
+  save();
+} else if (_migrated) {
+  save();
+}
+
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(reservas)); }
+
+function getMontoIsk(r) {
+  const m = parseFloat(r.monto) || 0;
+  if (!m) return 0;
+  if (r.moneda === 'USD') return m * FX_USD;
+  if (r.moneda === 'EUR') return m * FX_EUR;
+  return m;
+}
+
+function fmtMontoCard(r) {
+  const m = parseFloat(r.monto) || 0;
+  if (!m) return '—';
+  const isk = getMontoIsk(r);
+  const usd = isk / FX_USD;
+  if (r.moneda === 'USD') return '<strong style="color:#1a3a52">$' + m.toLocaleString('es', {maximumFractionDigits:2}) + ' USD</strong> · ' + Math.round(isk).toLocaleString('es') + ' ISK';
+  if (r.moneda === 'EUR') return '<strong style="color:#1a3a52">€' + m.toLocaleString('es', {maximumFractionDigits:2}) + ' EUR</strong> · ' + Math.round(isk).toLocaleString('es') + ' ISK · $' + Math.round(usd) + ' USD';
+  return '<strong style="color:#1a3a52">' + Math.round(m).toLocaleString('es') + ' ISK</strong> · $' + Math.round(usd) + ' USD';
+}
+
+function fmtFecha(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  return dias[d.getDay()] + ' ' + d.getDate() + ' ' + meses[d.getMonth()] + ' ' + d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+}
+
+function escapeHtml(s) {
+  return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function render() {
+  const filterTipo = document.getElementById('filterTipo').value;
+  const filterText = document.getElementById('filterText').value.toLowerCase();
+  const sortBy = document.getElementById('sortBy').value;
+
+  let arr = [...reservas];
+  if (filterTipo) arr = arr.filter(r => r.tipo === filterTipo);
+  if (filterText) arr = arr.filter(r =>
+    (r.titulo||'').toLowerCase().includes(filterText) ||
+    (r.ubicacion||'').toLowerCase().includes(filterText) ||
+    (r.notas||'').toLowerCase().includes(filterText) ||
+    (r.codigo||'').toLowerCase().includes(filterText)
+  );
+  arr.sort((a,b) => {
+    if (sortBy === 'fechaInicio') return (a.fechaInicio||'').localeCompare(b.fechaInicio||'');
+    if (sortBy === 'tipo') return (a.tipo||'').localeCompare(b.tipo||'');
+    if (sortBy === 'montoIsk') return getMontoIsk(b) - getMontoIsk(a);
+    return 0;
+  });
+
+  const totalIsk = reservas.reduce((s,r) => s + getMontoIsk(r), 0);
+  const totalUsd = totalIsk / FX_USD;
+  const totalEur = totalIsk / FX_EUR;
+  document.getElementById('summary').innerHTML =
+    '<div><div class="stat-label">Total reservas</div><div class="stat-value">' + reservas.length + '</div></div>' +
+    '<div><div class="stat-label">Total ISK</div><div class="stat-value">' + Math.round(totalIsk).toLocaleString('es') + '</div></div>' +
+    '<div><div class="stat-label">Total USD</div><div class="stat-value">$' + Math.round(totalUsd).toLocaleString('es') + '</div><div class="stat-sub">@ ' + FX_USD + ' ISK/USD</div></div>' +
+    '<div><div class="stat-label">Total EUR</div><div class="stat-value">€' + Math.round(totalEur).toLocaleString('es') + '</div><div class="stat-sub">@ ' + FX_EUR + ' ISK/EUR</div></div>' +
+    '<div><div class="stat-label">Mostrando</div><div class="stat-value">' + arr.length + '</div></div>';
+
+  const cont = document.getElementById('cards');
+  if (arr.length === 0) {
+    cont.innerHTML = '<div class="empty">No hay reservas. Click <strong>+ Nueva reserva</strong>.</div>';
+    return;
+  }
+  cont.innerHTML = arr.map(r =>
+    '<div class="card">' +
+      '<div class="card-header">' +
+        '<span class="card-tipo tipo-' + r.tipo + '">' + r.tipo + '</span>' +
+      '</div>' +
+      '<div class="card-titulo">' + escapeHtml(r.titulo) + '</div>' +
+      '<div class="card-fecha">' + fmtFecha(r.fechaInicio) + (r.fechaFin?' → '+fmtFecha(r.fechaFin):'') + '</div>' +
+      (r.ubicacion ? '<div class="card-row"><strong>Lugar:</strong> <span>' + escapeHtml(r.ubicacion) + '</span></div>' : '') +
+      (r.codigo ? '<div class="card-row"><strong>Código:</strong> <span>' + escapeHtml(r.codigo) + '</span></div>' : '') +
+      (parseFloat(r.monto) ? '<div class="card-row"><strong>Monto:</strong> <span>' + fmtMontoCard(r) + '</span></div>' : '') +
+      (r.pago ? '<div class="card-row"><strong>Pagó:</strong> <span>' + (r.pago === 'Persona2' ? 'Persona 2' : r.pago) + ' · ' + (r.division||'50/50') + '</span></div>' : '') +
+      (r.notas ? '<div class="card-row"><strong>Notas:</strong> <span style="font-style:italic;color:#666">' + escapeHtml(r.notas) + '</span></div>' : '') +
+      (r.link ? '<div class="card-row"><a class="card-link" href="' + escapeHtml(r.link) + '" target="_blank">' + escapeHtml(r.link).slice(0,60) + (r.link.length>60?'...':'') + '</a></div>' : '') +
+      (r.imagen ? '<img class="card-img" src="' + r.imagen + '" onclick="openLightbox(\'' + r.id + '\')">' : '') +
+      '<div class="card-actions">' +
+        '<button onclick="editReserva(\'' + r.id + '\')">Editar</button>' +
+        '<button class="danger" onclick="deleteReserva(\'' + r.id + '\')">Borrar</button>' +
+      '</div>' +
+    '</div>'
+  ).join('');
+}
+
+function openModal(reserva) {
+  document.getElementById('modalTitle').textContent = reserva ? 'Editar reserva' : 'Nueva reserva';
+  document.getElementById('f_id').value = reserva ? reserva.id : '';
+  document.getElementById('f_tipo').value = (reserva && reserva.tipo) || 'Tour';
+  document.getElementById('f_titulo').value = (reserva && reserva.titulo) || '';
+  document.getElementById('f_fechaInicio').value = (reserva && reserva.fechaInicio) || '2026-09-09T12:00';
+  document.getElementById('f_fechaFin').value = (reserva && reserva.fechaFin) || '';
+  document.getElementById('f_ubicacion').value = (reserva && reserva.ubicacion) || '';
+  document.getElementById('f_codigo').value = (reserva && reserva.codigo) || '';
+  document.getElementById('f_link').value = (reserva && reserva.link) || '';
+  document.getElementById('f_monto').value = (reserva && reserva.monto) || '';
+  document.getElementById('f_moneda').value = (reserva && reserva.moneda) || 'ISK';
+  document.getElementById('f_pago').value = (reserva && reserva.pago) || 'Giancarlo';
+  document.getElementById('f_division').value = (reserva && reserva.division) || '50/50';
+  document.getElementById('f_participantes').value = (reserva && reserva.participantes) || 'Ambos';
+  document.getElementById('f_notas').value = (reserva && reserva.notas) || '';
+  document.getElementById('f_imagen').value = '';
+  document.getElementById('f_imagen_data').value = (reserva && reserva.imagen) || '';
+  if (reserva && reserva.imagen) {
+    document.getElementById('imagePreview').src = reserva.imagen;
+    document.getElementById('imagePreview').style.display = 'block';
+    document.getElementById('btnRemoveImg').style.display = 'inline-block';
+  } else {
+    document.getElementById('imagePreview').style.display = 'none';
+    document.getElementById('btnRemoveImg').style.display = 'none';
+  }
+  document.getElementById('modalBg').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modalBg').classList.remove('open'); }
+
+function previewImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) {
+    alert('Imagen muy grande (max 2 MB).');
+    e.target.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    document.getElementById('imagePreview').src = ev.target.result;
+    document.getElementById('imagePreview').style.display = 'block';
+    document.getElementById('f_imagen_data').value = ev.target.result;
+    document.getElementById('btnRemoveImg').style.display = 'inline-block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImage() {
+  document.getElementById('f_imagen').value = '';
+  document.getElementById('f_imagen_data').value = '';
+  document.getElementById('imagePreview').style.display = 'none';
+  document.getElementById('btnRemoveImg').style.display = 'none';
+}
+
+function saveReserva(e) {
+  e.preventDefault();
+  const fi = document.getElementById('f_fechaInicio').value;
+  const ff = document.getElementById('f_fechaFin').value;
+  if (fi && (fi < TRIP_START || fi > TRIP_END)) {
+    alert('La fecha de inicio debe estar entre el 8 y el 23 de septiembre de 2026.');
+    return;
+  }
+  if (ff && (ff < TRIP_START || ff > TRIP_END)) {
+    alert('La fecha de fin debe estar entre el 8 y el 23 de septiembre de 2026.');
+    return;
+  }
+  if (fi && ff && ff < fi) {
+    alert('La fecha de fin no puede ser anterior a la de inicio.');
+    return;
+  }
+  const id = document.getElementById('f_id').value || ('r-' + Date.now() + '-' + Math.random().toString(36).slice(2,7));
+  const data = {
+    id: id,
+    tipo: document.getElementById('f_tipo').value,
+    titulo: document.getElementById('f_titulo').value.trim(),
+    fechaInicio: fi,
+    fechaFin: ff,
+    ubicacion: document.getElementById('f_ubicacion').value.trim(),
+    codigo: document.getElementById('f_codigo').value.trim(),
+    link: document.getElementById('f_link').value.trim(),
+    moneda: document.getElementById('f_moneda').value,
+    monto: parseFloat(document.getElementById('f_monto').value) || 0,
+    pago: document.getElementById('f_pago').value,
+    division: document.getElementById('f_division').value,
+    participantes: document.getElementById('f_participantes').value,
+    notas: document.getElementById('f_notas').value.trim(),
+    imagen: document.getElementById('f_imagen_data').value,
+    creadoEn: new Date().toISOString()
+  };
+  const idx = reservas.findIndex(r => r.id === id);
+  if (idx >= 0) reservas[idx] = Object.assign({}, reservas[idx], data);
+  else reservas.push(data);
+  save();
+  render();
+  closeModal();
+}
+
+function editReserva(id) {
+  const r = reservas.find(x => x.id === id);
+  if (r) openModal(r);
+}
+
+function deleteReserva(id) {
+  const r = reservas.find(x => x.id === id);
+  if (!r) return;
+  if (!confirm('Borrar la reserva "' + r.titulo + '"?')) return;
+  reservas = reservas.filter(x => x.id !== id);
+  save();
+  render();
+}
+
+function clearAll() {
+  if (!confirm('Esto borra TODAS las reservas. Seguro?')) return;
+  if (!confirm('Confirmar borrado total?')) return;
+  reservas = [];
+  save();
+  render();
+}
+
+function openLightbox(id) {
+  const r = reservas.find(x => x.id === id);
+  if (!r || !r.imagen) return;
+  document.getElementById('lightboxImg').src = r.imagen;
+  document.getElementById('lightbox').classList.add('open');
+}
+
+function toIcsLocal(iso) {
+  if (!iso) return '';
+  return iso.slice(0,4) + iso.slice(5,7) + iso.slice(8,10) + 'T' + iso.slice(11,13) + iso.slice(14,16) + '00Z';
+}
+
+function escapeIcs(s) { return String(s||'').replace(/[\\,;]/g, c => '\\'+c).replace(/\n/g, '\\n'); }
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function exportIcs() {
+  if (reservas.length === 0) { alert('No hay reservas que exportar.'); return; }
+  const now = new Date();
+  const dtstamp = now.getUTCFullYear() + pad(now.getUTCMonth()+1) + pad(now.getUTCDate()) + 'T' + pad(now.getUTCHours()) + pad(now.getUTCMinutes()) + pad(now.getUTCSeconds()) + 'Z';
+  let ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Islandia Sep 2026//Gestor//ES\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:Islandia Sep 2026\r\nX-WR-TIMEZONE:Atlantic/Reykjavik\r\n';
+  reservas.forEach(r => {
+    if (!r.fechaInicio) return;
+    const start = toIcsLocal(r.fechaInicio);
+    let end;
+    if (r.fechaFin) {
+      end = toIcsLocal(r.fechaFin);
+    } else {
+      const d = new Date(r.fechaInicio + ':00Z');
+      d.setHours(d.getHours() + 1);
+      end = d.getUTCFullYear() + pad(d.getUTCMonth()+1) + pad(d.getUTCDate()) + 'T' + pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + '00Z';
+    }
+    const summary = '[' + r.tipo + '] ' + r.titulo;
+    const descParts = [];
+    if (r.codigo) descParts.push('Código: ' + r.codigo);
+    const isk = getMontoIsk(r);
+    if (parseFloat(r.monto)) {
+      let line;
+      if (r.moneda === 'USD') line = 'Monto: $' + parseFloat(r.monto).toLocaleString('es', {maximumFractionDigits:2}) + ' USD (~' + Math.round(isk).toLocaleString('es') + ' ISK)';
+      else if (r.moneda === 'EUR') line = 'Monto: €' + parseFloat(r.monto).toLocaleString('es', {maximumFractionDigits:2}) + ' EUR (~' + Math.round(isk).toLocaleString('es') + ' ISK / ~$' + Math.round(isk/FX_USD) + ' USD)';
+      else line = 'Monto: ' + Math.round(parseFloat(r.monto)).toLocaleString('es') + ' ISK (~$' + Math.round(isk/FX_USD) + ' USD)';
+      descParts.push(line);
+    }
+    if (r.pago) descParts.push('Pagó: ' + (r.pago === 'Persona2' ? 'Persona 2' : r.pago));
+    if (r.division) descParts.push('División: ' + r.division);
+    if (r.link) descParts.push('Link: ' + r.link);
+    if (r.notas) descParts.push('Notas: ' + r.notas);
+    ics += 'BEGIN:VEVENT\r\nUID:' + r.id + '@islandia2026\r\nDTSTAMP:' + dtstamp + '\r\nDTSTART:' + start + '\r\nDTEND:' + end + '\r\nSUMMARY:' + escapeIcs(summary) + '\r\n';
+    if (r.ubicacion) ics += 'LOCATION:' + escapeIcs(r.ubicacion) + '\r\n';
+    if (descParts.length) ics += 'DESCRIPTION:' + escapeIcs(descParts.join('\n')) + '\r\n';
+    if (r.link) ics += 'URL:' + escapeIcs(r.link) + '\r\n';
+    ics += 'STATUS:CONFIRMED\r\nTRANSP:OPAQUE\r\n';
+    const minBefore = (r.tipo === 'Vuelo' || r.tipo === 'Alojamiento') ? 1440 : 120;
+    ics += 'BEGIN:VALARM\r\nTRIGGER:-PT' + minBefore + 'M\r\nACTION:DISPLAY\r\nDESCRIPTION:' + escapeIcs('Recordatorio: ' + summary) + '\r\nEND:VALARM\r\nEND:VEVENT\r\n';
+  });
+  ics += 'END:VCALENDAR\r\n';
+  download('islandia_sep2026.ics', ics, 'text/calendar');
+}
+
+function categoriaPara(tipo) {
+  return ({Vuelo:'Transporte', Alojamiento:'Alojamiento', Auto:'Transporte', Tour:'Actividades', Comida:'Comida', Otro:'Otros'})[tipo] || 'Otros';
+}
+
+function copyExcel() {
+  if (reservas.length === 0) { alert('No hay reservas.'); return; }
+  const rows = [];
+  rows.push(['Fecha', 'Categoría', 'Descripción', 'Pagó', 'División', 'Moneda', 'Monto']);
+  reservas
+    .filter(r => r.fechaInicio && parseFloat(r.monto))
+    .sort((a,b) => a.fechaInicio.localeCompare(b.fechaInicio))
+    .forEach(r => {
+      const fecha = r.fechaInicio.slice(0,10);
+      const desc = r.titulo + (r.codigo ? ' (#' + r.codigo + ')' : '');
+      const pago = r.pago === 'Persona2' ? 'Persona 2' : 'Giancarlo';
+      rows.push([fecha, categoriaPara(r.tipo), desc, pago, r.division||'50/50', r.moneda||'ISK', r.monto]);
+    });
+  const tsv = rows.map(r => r.join('\t')).join('\n');
+  navigator.clipboard.writeText(tsv).then(() => {
+    alert('Copiado ' + (rows.length-1) + ' filas. Para sincronizar la planilla sin riesgo, mejor usá JSON para Claude.');
+  }).catch(() => {
+    console.log(tsv);
+    alert('No se pudo copiar al portapapeles.');
+  });
+}
+
+function copyJson() {
+  if (reservas.length === 0) { alert('No hay reservas.'); return; }
+  const slim = reservas.map(r => Object.assign({}, r, {imagen: r.imagen ? '[imagen guardada localmente]' : ''}));
+  const txt = JSON.stringify(slim, null, 2);
+  navigator.clipboard.writeText(txt).then(() => {
+    alert('JSON copiado. Pegámelo en el chat con: "actualizá la planilla con estas reservas"');
+  }).catch(() => prompt('Copiá este JSON y pegámelo en el chat:', txt));
+}
+
+function exportJson() {
+  const txt = JSON.stringify(reservas, null, 2);
+  const today = new Date().toISOString().slice(0,10);
+  download('islandia_reservas_backup_' + today + '.json', txt, 'application/json');
+}
+
+function importJson(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!Array.isArray(data)) throw new Error('No es un array');
+      if (!confirm('Restaurar ' + data.length + ' reservas? Esto reemplaza las actuales.')) return;
+      reservas = data;
+      reservas.forEach(r => {
+        if (r.moneda === undefined) {
+          r.moneda = 'ISK';
+          r.monto = (r.montoIsk !== undefined) ? r.montoIsk : (r.monto || 0);
+          delete r.montoIsk;
+        }
+      });
+      save();
+      render();
+      alert('Restaurado.');
+    } catch (err) { alert('Error: ' + err.message); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function download(filename, content, mime) {
+  const blob = new Blob([content], {type: mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 100);
+}
+
+render();
+</script>
+</body>
+</html>
