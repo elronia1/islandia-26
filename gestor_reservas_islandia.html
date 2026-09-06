@@ -649,7 +649,10 @@ function loadCache(){
 }
 function attachData(){
   onValue(ref(db,'reservas'), (snap) => {
-    reservas = []; snap.forEach(ch => reservas.push({ ...ch.val(), id: ch.key }));
+    // OJO: DataSnapshot.forEach CANCELA la iteracion si el callback devuelve truthy.
+    // Por eso el cuerpo va con llaves y sin return: push() devuelve la longitud (truthy) y cortaria en el 1er registro.
+    reservas = [];
+    snap.forEach(ch => { reservas.push({ ...ch.val(), id: ch.key }); });
     try { localStorage.setItem(CACHE_KEY, JSON.stringify({ts:Date.now(), reservas})); } catch(e){}
     setSync('ok'); render();
   }, (err) => setSync('err', err.message));
