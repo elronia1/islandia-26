@@ -436,7 +436,7 @@ footer{text-align:center;color:var(--fg-subtle);font-size:12px;padding:var(--s6)
         <button class="btn" onclick="copyJson()"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-copy"/></svg>JSON para Claude</button>
         <button class="btn" onclick="exportJson()"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-down"/></svg>Backup JSON</button>
         <button class="btn" onclick="document.getElementById('importInput').click()">Restaurar backup</button>
-        <input type="file" id="importInput" accept=".json" hidden onchange="importJson(event)">
+        <input type="file" id="importInput" accept=".json,application/json,text/plain,*/*" class="sr-only" onchange="importJson(event)">
       </div>
       <p class="hint" style="font-size:12.5px;color:var(--fg-subtle);margin-top:var(--s3)">
         El .ics usa hora de Reykjavík (UTC+0 todo el año). Cambio aplicado: <strong>124 ISK/USD</strong> · <strong>142 ISK/EUR</strong>.
@@ -551,7 +551,7 @@ footer{text-align:center;color:var(--fg-subtle);font-size:12px;padding:var(--s6)
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, browserLocalPersistence, setPersistence } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getDatabase, ref, set, update, onValue, remove } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
 /* === CONFIG — idéntica a la v1, no tocar === */
 const firebaseConfig = {
@@ -1028,16 +1028,44 @@ window.importJson = (e) => {
     try {
       const data = JSON.parse(ev.target.result);
       if (!Array.isArray(data)) throw new Error('El archivo no es una lista de reservas');
-      if (!confirm('¿Subir '+data.length+' reservas? Pisa las que tengan el mismo ID.')) return;
+      const kb = Math.round(ev.target.result.length/1024);
+      if (!confirm('¿Subir '+data.length+' reservas ('+kb+' KB)?\n\nAgrega y pisa por ID. NO borra lo que ya esté cargado.')) return;
+
+      // payload unico: una sola escritura atomica en vez de N secuenciales.
+      const payload = {};
       for (const r of data){
         const id = r.id || ('r-'+Date.now()+'-'+Math.random().toString(36).slice(2,7));
         const o = {...r}; delete o.id;
         if (o.moneda === undefined){ o.moneda='ISK'; o.monto = o.montoIsk ?? o.monto ?? 0; delete o.montoIsk; }
         if (o.estado === undefined) o.estado = 'Pagado';
-        await set(ref(db,'reservas/'+id), o);
+        payload[id] = o;
       }
-      toast('Restauradas '+data.length+' reservas');
-    } catch(err){ toast('Error: '+err.message); }
+      toast('Subiendo '+data.length+' reservas ('+kb+' KB)…');
+      try {
+        await update(ref(db,'reservas'), payload);   // update, NO set: no toca lo que no viene en el archivo
+        toast('Restauradas '+data.length+' reservas');
+        return;
+      } catch(e1){
+        console.warn('Lote atomico fallo, voy de a una:', e1.message);
+      }
+
+      // Plan B: de a una, con timeout por registro para que nunca quede colgado.
+      let ok = 0; const fallos = [];
+      for (const [id,o] of Object.entries(payload)){
+        try {
+          await Promise.race([
+            update(ref(db,'reservas'), {[id]: o}),
+            new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout a los 20 s')),20000))
+          ]);
+          ok++; toast('Subidas '+ok+' de '+data.length+'…');
+        } catch(e){ fallos.push((o.titulo||id)+': '+e.message); }
+      }
+      if (fallos.length){
+        console.error('Fallos al restaurar:', fallos);
+        alert('Restauradas '+ok+' de '+data.length+'.\n\nNo entraron '+fallos.length+':\n'+fallos.slice(0,5).join('\n')+
+              (fallos.length>5?'\n…(ver consola del navegador)':''));
+      } else toast('Restauradas '+ok+' reservas');
+    } catch(err){ alert('No se pudo leer el archivo.\n\n'+err.message+'\n\nRevisá que sea el .json exportado por el gestor.'); }
   };
   rd.readAsText(f); e.target.value='';
 };
