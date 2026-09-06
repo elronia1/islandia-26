@@ -1,350 +1,559 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="auto">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0F766E" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B1220" media="(prefers-color-scheme: dark)">
 <title>Gestor de Reservas — Islandia Sep 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light; }
-* { box-sizing: border-box; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: #f7f6f3; color: #1a1a1a; margin: 0; padding: 20px; line-height: 1.5;
+/* ============================================================
+   DESIGN TOKENS — Flat Design / teal + accion naranja
+   Generado con ui-ux-pro-max (density 8, motion 2, variance 4)
+   ============================================================ */
+:root{
+  --brand:#0F766E; --brand-600:#0D9488; --brand-050:#F0FDFA; --brand-100:#CCFBF1;
+  --accent:#C2410C; --accent-050:#FFF7ED; --accent-100:#FFEDD5;
+  --bg:#F4F7F7; --surface:#FFFFFF; --surface-2:#F8FAFA;
+  --fg:#0F2B2A; --fg-muted:#4A5F62; --fg-subtle:#7A8A8C;
+  --border:#DDE6E6; --border-strong:#C2D2D2;
+  --danger:#B91C1C; --danger-bg:#FEF2F2;
+  --ok:#15803D; --ok-bg:#F0FDF4;
+  --warn:#A16207; --warn-bg:#FEFCE8;
+  --ring:#0D9488;
+  --shadow:0 1px 2px rgba(15,43,42,.06), 0 4px 14px rgba(15,43,42,.05);
+  --shadow-lg:0 12px 40px rgba(15,43,42,.18);
+  /* density 8 -> dashboard */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px; --s6:24px; --s8:32px;
+  --r1:8px; --r2:12px; --r3:16px; --r-pill:999px;
+  --t:160ms cubic-bezier(.2,.6,.3,1);
+  color-scheme:light;
 }
-.container { max-width: 1200px; margin: 0 auto; }
-header { margin-bottom: 24px; }
-h1 { color: #1a3a52; margin: 0 0 4px 0; font-size: 24px; }
-.subtitle { color: #666; font-size: 14px; }
-.user-bar {
-  display: flex; justify-content: space-between; align-items: center;
-  background: #fff; padding: 8px 14px; border-radius: 8px;
-  border: 1px solid #e5e5e5; margin-bottom: 16px; font-size: 13px;
+:root[data-theme="dark"], :root[data-theme="auto"].is-dark{
+  --brand:#2DD4BF; --brand-600:#5EEAD4; --brand-050:#0F2A28; --brand-100:#134E4A;
+  --accent:#FB923C; --accent-050:#2A1A0E; --accent-100:#3A250F;
+  --bg:#0B1220; --surface:#131C2B; --surface-2:#182233;
+  --fg:#E8F0F0; --fg-muted:#A9BCBE; --fg-subtle:#7E9194;
+  --border:#25344A; --border-strong:#35475F;
+  --danger:#FCA5A5; --danger-bg:#2A1417;
+  --ok:#86EFAC; --ok-bg:#0F2418;
+  --warn:#FDE047; --warn-bg:#2A2410;
+  --ring:#2DD4BF;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.35);
+  --shadow-lg:0 12px 40px rgba(0,0,0,.6);
+  color-scheme:dark;
 }
-.user-bar .who { color: #1a3a52; font-weight: 600; }
-.user-bar .sync-status { color: #2d7a3e; font-size: 12px; }
-.user-bar .sync-status.offline { color: #b85c00; }
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--fg);
+  font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+h1,h2,h3{margin:0; line-height:1.25; font-weight:700; letter-spacing:-.01em}
+a{color:var(--brand)}
+:focus-visible{outline:2px solid var(--ring); outline-offset:2px; border-radius:4px}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
-.toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; align-items: center; }
-button {
-  font-family: inherit; font-size: 13px; padding: 8px 14px;
-  border-radius: 6px; border: 1px solid #d0d0d0; background: #fff;
-  cursor: pointer; transition: all 0.15s;
+/* ---------- primitives ---------- */
+.btn{
+  font:inherit; font-size:14px; font-weight:600; line-height:1;
+  min-height:44px; padding:0 var(--s4); border-radius:var(--r1);
+  border:1px solid var(--border-strong); background:var(--surface); color:var(--fg);
+  cursor:pointer; transition:background var(--t),border-color var(--t),transform var(--t);
+  display:inline-flex; align-items:center; gap:var(--s2); white-space:nowrap;
 }
-button:hover { background: #f0f0ee; border-color: #999; }
-button.primary { background: #1a3a52; color: #fff; border-color: #1a3a52; }
-button.primary:hover { background: #285573; }
-button.danger { color: #b00020; }
-button.success { background: #2d7a3e; color: #fff; border-color: #2d7a3e; }
-button.success:hover { background: #3a9450; }
+.btn:hover{background:var(--surface-2); border-color:var(--brand)}
+.btn:active{transform:translateY(1px)}
+.btn--primary{background:var(--brand); border-color:var(--brand); color:#fff}
+:root[data-theme="dark"] .btn--primary,:root.is-dark .btn--primary{color:#06211F}
+.btn--primary:hover{background:var(--brand-600); border-color:var(--brand-600)}
+.btn--accent{background:var(--accent); border-color:var(--accent); color:#fff}
+:root[data-theme="dark"] .btn--accent,:root.is-dark .btn--accent{color:#241004}
+.btn--ghost{border-color:transparent; background:transparent}
+.btn--ghost:hover{background:var(--surface-2); border-color:var(--border)}
+.btn--danger{color:var(--danger); border-color:var(--border-strong)}
+.btn--danger:hover{background:var(--danger-bg); border-color:var(--danger)}
+.btn--sm{min-height:36px; font-size:13px; padding:0 var(--s3)}
+.btn--icon{min-width:44px; padding:0 var(--s2); justify-content:center}
+.btn svg{width:16px; height:16px; flex:none}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 
-.summary {
-  background: #fff; border: 1px solid #e5e5e5; border-radius: 8px;
-  padding: 16px; margin-bottom: 16px;
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px;
+/* ---------- app bar ---------- */
+.appbar{
+  position:sticky; top:0; z-index:40; background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:var(--s3) var(--s4); padding-top:calc(var(--s3) + env(safe-area-inset-top));
 }
-.stat-label { color: #666; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-.stat-value { font-size: 22px; font-weight: 600; color: #1a3a52; margin-top: 2px; }
-.stat-sub { font-size: 12px; color: #888; }
+.appbar__in{max-width:1180px; margin:0 auto; display:flex; align-items:center; gap:var(--s3)}
+.brand{display:flex; align-items:center; gap:var(--s3); min-width:0}
+.brand__mark{width:34px;height:34px;border-radius:10px;background:var(--brand);display:grid;place-items:center;flex:none}
+.brand__mark svg{width:19px;height:19px;color:#fff}
+:root[data-theme="dark"] .brand__mark svg,:root.is-dark .brand__mark svg{color:#06211F}
+.brand__txt{min-width:0}
+.brand h1{font-size:15px}
+.brand p{margin:1px 0 0; font-size:12px; color:var(--fg-subtle); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.appbar__sp{flex:1}
+.chip-user{
+  display:inline-flex;align-items:center;gap:var(--s2);font-size:13px;font-weight:600;
+  background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-pill);padding:6px 12px;
+}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none}
+.dot.is-off{background:var(--warn)}
+.dot.is-err{background:var(--danger)}
+@media (max-width:720px){ .chip-user span.who{display:none} .brand p{display:none} }
 
-.filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-.filter-bar select, .filter-bar input {
-  padding: 6px 10px; border-radius: 6px; border: 1px solid #d0d0d0;
-  font-size: 13px; background: #fff;
-}
+.wrap{max-width:1180px; margin:0 auto; padding:var(--s5) var(--s4) 96px}
 
-.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
-.card {
-  background: #fff; border: 1px solid #e5e5e5; border-radius: 10px;
-  padding: 14px; position: relative; transition: all 0.15s;
+/* ---------- next-up hero ---------- */
+.nextup{
+  background:linear-gradient(135deg,var(--brand) 0%,var(--brand-600) 100%);
+  border-radius:var(--r3); padding:var(--s5); margin-bottom:var(--s5); color:#fff;
+  display:flex; flex-wrap:wrap; gap:var(--s4); align-items:center; box-shadow:var(--shadow);
 }
-.card:hover { border-color: #1a3a52; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-.card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-.card-tipo { display: inline-block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 8px; border-radius: 4px; font-weight: 600; }
-.tipo-Vuelo { background: #e3f2fd; color: #0d47a1; }
-.tipo-Alojamiento { background: #f3e5f5; color: #6a1b9a; }
-.tipo-Auto { background: #fff8e1; color: #b85c00; }
-.tipo-Tour { background: #e8f5e9; color: #1b5e20; }
-.tipo-Comida { background: #ffebee; color: #b71c1c; }
-.tipo-Otro { background: #eceff1; color: #37474f; }
+:root[data-theme="dark"] .nextup,:root.is-dark .nextup{color:#06211F}
+.nextup__k{font-size:11px;text-transform:uppercase;letter-spacing:.09em;opacity:.85;font-weight:700}
+.nextup__t{font-size:20px;font-weight:700;margin-top:2px}
+.nextup__m{font-size:14px;opacity:.92;margin-top:var(--s1)}
+.nextup__cd{margin-left:auto;text-align:right;font-variant-numeric:tabular-nums}
+.nextup__cd b{display:block;font-size:28px;line-height:1}
+.nextup__cd small{font-size:12px;opacity:.85}
+.nextup > div:first-child{flex:1;min-width:0}
+@media (max-width:600px){
+  .nextup{flex-direction:column;align-items:flex-start;gap:var(--s3)}
+  .nextup__cd{margin-left:0;text-align:left;display:flex;align-items:baseline;gap:6px}
+  .nextup__cd b{font-size:24px}
+}
+@media (max-width:720px){ #btnNew{display:none} }
 
-.card-titulo { font-weight: 600; font-size: 16px; margin: 4px 0; color: #1a1a1a; }
-.card-fecha { color: #555; font-size: 13px; margin-bottom: 6px; }
-.card-row { font-size: 13px; color: #444; margin: 3px 0; display: flex; gap: 6px; }
-.card-row strong { color: #1a1a1a; min-width: 70px; }
-.card-img { max-width: 100%; max-height: 140px; border-radius: 6px; margin: 8px 0; cursor: pointer; }
-.card-img:hover { opacity: 0.85; }
-.card-actions { display: flex; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f0f0f0; }
-.card-actions button { font-size: 12px; padding: 5px 10px; }
-.card-actions .creado { font-size: 11px; color: #999; margin-left: auto; align-self: center; }
-.card-link { color: #1a3a52; font-size: 12px; text-decoration: none; word-break: break-all; }
-.card-link:hover { text-decoration: underline; }
+/* ---------- stats ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--s3);margin-bottom:var(--s4)}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:var(--s4)}
+.stat__k{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--fg-subtle);font-weight:700}
+.stat__v{font-size:22px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
+.stat__s{font-size:12px;color:var(--fg-subtle);margin-top:1px}
+.stat--accent .stat__v{color:var(--accent)}
 
-.empty { text-align: center; padding: 40px; color: #888; background: #fff; border: 2px dashed #d0d0d0; border-radius: 10px; }
+/* ---------- panel ---------- */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);margin-bottom:var(--s4);overflow:hidden}
+.panel__hd{
+  width:100%;display:flex;align-items:center;gap:var(--s3);padding:var(--s4);
+  background:none;border:0;font:inherit;font-weight:700;font-size:14px;color:var(--fg);cursor:pointer;text-align:left;
+}
+.panel__hd:hover{background:var(--surface-2)}
+.panel__hd .caret{margin-left:auto;transition:transform var(--t);width:16px;height:16px;color:var(--fg-subtle)}
+.panel[open] .panel__hd .caret{transform:rotate(180deg)}
+.panel__bd{padding:0 var(--s4) var(--s4)}
+.ledger{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.ledger td{padding:7px 0;border-bottom:1px solid var(--border)}
+.ledger td:last-child{text-align:right;font-weight:600}
+.ledger tr.total td{border-bottom:0;border-top:2px solid var(--border-strong);padding-top:var(--s3);font-size:16px;font-weight:700}
+.ledger tr.total td:last-child{color:var(--accent);font-size:20px}
+.ledger .neg{color:var(--danger)}
+.note svg{width:14px;height:14px;vertical-align:-2px;flex:none;color:var(--warn)}
+.note{font-size:13px;color:var(--fg-muted);background:var(--warn-bg);border-left:3px solid var(--warn);padding:var(--s3);border-radius:0 var(--r1) var(--r1) 0;margin-top:var(--s3)}
+.adj{display:grid;grid-template-columns:1fr auto;gap:var(--s2) var(--s3);align-items:center;margin-top:var(--s3);font-size:13px}
+.adj input{width:130px;text-align:right}
 
-.modal-bg {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.5); display: none;
-  align-items: flex-start; justify-content: center;
-  padding: 20px; z-index: 100; overflow-y: auto;
+/* ---------- toolbar / filters ---------- */
+.bar{display:flex;flex-wrap:wrap;gap:var(--s2);margin-bottom:var(--s3);align-items:center}
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r1);padding:3px;gap:3px}
+.seg button{
+  font:inherit;font-size:13px;font-weight:600;min-height:38px;padding:0 var(--s3);
+  border:0;border-radius:6px;background:transparent;color:var(--fg-muted);cursor:pointer;transition:all var(--t);
+  display:inline-flex;align-items:center;gap:6px;
 }
-.modal-bg.open { display: flex; }
-.modal {
-  background: #fff; border-radius: 12px; padding: 24px;
-  width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto;
+.seg button svg{width:15px;height:15px}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--brand);box-shadow:var(--shadow)}
+.search{position:relative;flex:1;min-width:200px}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:var(--fg-subtle);pointer-events:none}
+input,select,textarea{
+  font:inherit;font-size:15px;width:100%;min-height:44px;padding:10px 12px;
+  border:1px solid var(--border-strong);border-radius:var(--r1);
+  background:var(--surface);color:var(--fg);transition:border-color var(--t),box-shadow var(--t);
 }
-.modal h2 { margin-top: 0; color: #1a3a52; }
-.form-row { margin-bottom: 12px; }
-.form-row label { display: block; font-size: 12px; color: #555; font-weight: 600; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
-.form-row input, .form-row select, .form-row textarea {
-  width: 100%; padding: 8px 10px; border-radius: 6px;
-  border: 1px solid #d0d0d0; font-size: 14px; font-family: inherit; background: #fff;
+input:focus,select:focus,textarea:focus{border-color:var(--ring);box-shadow:0 0 0 3px color-mix(in srgb,var(--ring) 22%,transparent);outline:none}
+.search input{padding-left:36px}
+textarea{min-height:76px;resize:vertical;line-height:1.5}
+.chips{display:flex;flex-wrap:wrap;gap:var(--s2);margin-bottom:var(--s4)}
+.chip{
+  font:inherit;font-size:13px;font-weight:600;min-height:38px;padding:0 var(--s3);
+  border:1px solid var(--border);border-radius:var(--r-pill);background:var(--surface);color:var(--fg-muted);
+  cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all var(--t);
 }
-.form-row textarea { resize: vertical; min-height: 60px; }
-.form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
-.image-preview { max-width: 100%; max-height: 200px; border-radius: 6px; margin-top: 8px; }
+.chip:hover{border-color:var(--brand)}
+.chip[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+:root[data-theme="dark"] .chip[aria-pressed="true"],:root.is-dark .chip[aria-pressed="true"]{color:#06211F}
+.chip .n{font-size:11px;opacity:.75;font-variant-numeric:tabular-nums}
+.chip .sw{width:9px;height:9px;border-radius:50%}
+.chip[aria-pressed="true"] .sw{background:currentColor!important}
 
-.lightbox {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.9); display: none;
-  align-items: center; justify-content: center; z-index: 200; cursor: zoom-out;
+/* ---------- day groups (agenda) ---------- */
+.day{margin-bottom:var(--s6)}
+.day__hd{display:flex;align-items:baseline;gap:var(--s3);margin-bottom:var(--s3);flex-wrap:wrap}
+.day__n{
+  font-size:12px;font-weight:700;letter-spacing:.04em;background:var(--brand-050);color:var(--brand);
+  border:1px solid var(--brand-100);border-radius:var(--r-pill);padding:4px 11px;
 }
-.lightbox.open { display: flex; }
-.lightbox img { max-width: 95vw; max-height: 95vh; }
+.day--today .day__n{background:var(--accent);border-color:var(--accent);color:#fff}
+:root[data-theme="dark"] .day--today .day__n,:root.is-dark .day--today .day__n{color:#241004}
+.day__d{font-size:15px;font-weight:700;text-transform:capitalize}
+.day__z{font-size:13px;color:var(--fg-subtle)}
+.day__line{flex:1;height:1px;background:var(--border);min-width:20px}
 
-.help-block {
-  background: #fffbea; border-left: 4px solid #f9a825;
-  padding: 10px 14px; border-radius: 4px; font-size: 13px; color: #4d3800; margin-bottom: 16px;
+/* ---------- cards ---------- */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:var(--s3)}
+.cards--list{grid-template-columns:1fr}
+.card{
+  background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--t-color,var(--border-strong));
+  border-radius:var(--r2);padding:var(--s4);transition:border-color var(--t),box-shadow var(--t);
 }
-.help-block strong { color: #1a1a1a; }
-.help-block code { background: #fff; padding: 1px 4px; border-radius: 3px; font-size: 12px; }
+.card:hover{box-shadow:var(--shadow)}
+.card__hd{display:flex;align-items:flex-start;gap:var(--s3);margin-bottom:var(--s2)}
+.card__ico{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;flex:none;background:var(--t-bg,var(--surface-2));color:var(--t-color,var(--fg-muted))}
+.card__ico svg{width:17px;height:17px}
+.card__ti{flex:1;min-width:0}
+.card__t{font-size:16px;font-weight:700;overflow-wrap:anywhere}
+.card__d{font-size:13px;color:var(--fg-muted);margin-top:1px;font-variant-numeric:tabular-nums}
+.card__amt{text-align:right;flex:none}
+.card__amt b{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;display:block}
+.card__amt small{font-size:11px;color:var(--fg-subtle);font-variant-numeric:tabular-nums}
+.meta{display:flex;flex-wrap:wrap;gap:var(--s2);margin-top:var(--s3)}
+.tag{
+  display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;
+  background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-pill);padding:4px 10px;color:var(--fg-muted);
+}
+.tag svg{width:12px;height:12px}
+.tag--pend{background:var(--warn-bg);border-color:var(--warn);color:var(--warn)}
+.tag--mn{background:var(--accent-050);border-color:var(--accent-100);color:var(--accent)}
+.rows{margin-top:var(--s3);font-size:13.5px;display:grid;gap:5px}
+.row{display:flex;gap:var(--s2);align-items:flex-start;color:var(--fg-muted)}
+.row svg{width:14px;height:14px;flex:none;margin-top:3px;color:var(--fg-subtle)}
+.row a{color:var(--brand);overflow-wrap:anywhere}
+.row .code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:1px 6px;overflow-wrap:anywhere}
+.notes{white-space:pre-wrap;overflow-wrap:anywhere}
+.notes.clamp{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.linkbtn{font:inherit;font-size:12px;font-weight:600;background:none;border:0;color:var(--brand);cursor:pointer;padding:2px 0}
+.card__img{width:100%;max-height:150px;object-fit:cover;border-radius:var(--r1);margin-top:var(--s3);cursor:zoom-in;display:block}
+.card__ft{display:flex;gap:var(--s2);align-items:center;margin-top:var(--s3);padding-top:var(--s3);border-top:1px solid var(--border)}
+.card__ft .by{margin-left:auto;font-size:11px;color:var(--fg-subtle)}
 
-footer { text-align: center; color: #888; font-size: 12px; margin-top: 30px; }
+.empty{text-align:center;padding:var(--s8) var(--s4);color:var(--fg-subtle);background:var(--surface);border:2px dashed var(--border-strong);border-radius:var(--r2)}
 
-/* === LOGIN SCREEN === */
-.login-overlay {
-  position: fixed; inset: 0; background: linear-gradient(135deg, #1a3a52 0%, #285573 100%);
-  display: flex; align-items: center; justify-content: center; z-index: 1000;
+/* ---------- table view ---------- */
+.tablewrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow-x:auto}
+table.data{width:100%;border-collapse:collapse;font-size:13.5px;min-width:720px}
+table.data th{
+  text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-subtle);
+  padding:var(--s3);border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);
 }
-.login-card {
-  background: #fff; border-radius: 14px; padding: 36px 32px; max-width: 420px;
-  width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center;
-}
-.login-card h1 { color: #1a3a52; font-size: 22px; margin: 0 0 8px 0; }
-.login-card .sub { color: #666; font-size: 14px; margin-bottom: 24px; line-height: 1.5; }
-.btn-google {
-  display: inline-flex; align-items: center; gap: 10px;
-  padding: 10px 20px; background: #fff; color: #3c4043;
-  border: 1px solid #dadce0; border-radius: 6px;
-  font-size: 14px; font-weight: 500; cursor: pointer;
-  transition: all 0.15s; font-family: inherit;
-}
-.btn-google:hover { background: #f8f9fa; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-.btn-google svg { width: 18px; height: 18px; }
-.login-error { color: #b00020; font-size: 13px; margin-top: 14px; min-height: 18px; }
-.login-info { color: #888; font-size: 12px; margin-top: 20px; }
+table.data td{padding:var(--s3);border-bottom:1px solid var(--border);vertical-align:top}
+table.data tr:last-child td{border-bottom:0}
+table.data td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 
-.spinner {
-  display: inline-block; width: 16px; height: 16px;
-  border: 2px solid #ccc; border-top-color: #1a3a52;
-  border-radius: 50%; animation: spin 0.8s linear infinite;
-  vertical-align: middle; margin-right: 6px;
+/* ---------- modal ---------- */
+.scrim{position:fixed;inset:0;background:rgba(6,20,20,.55);backdrop-filter:blur(2px);display:none;align-items:flex-start;justify-content:center;padding:var(--s4);z-index:100;overflow-y:auto}
+.scrim.is-open{display:flex}
+.sheet{background:var(--surface);border-radius:var(--r3);width:100%;max-width:620px;box-shadow:var(--shadow-lg);margin:auto;overflow:hidden}
+.sheet__hd{display:flex;align-items:center;gap:var(--s3);padding:var(--s5) var(--s5) var(--s4);border-bottom:1px solid var(--border)}
+.sheet__hd h2{font-size:18px}
+.sheet__bd{padding:var(--s5);max-height:calc(100vh - 220px);overflow-y:auto}
+.sheet__ft{display:flex;gap:var(--s2);justify-content:flex-end;padding:var(--s4) var(--s5) calc(var(--s5) + env(safe-area-inset-bottom));border-top:1px solid var(--border);background:var(--surface-2);flex-wrap:wrap}
+.f{margin-bottom:var(--s4)}
+.f > label{display:block;font-size:12px;font-weight:700;color:var(--fg-muted);margin-bottom:6px;letter-spacing:.02em}
+.f .req{color:var(--accent)}
+.f .hint{font-size:12px;color:var(--fg-subtle);margin-top:5px}
+.f .err{font-size:12.5px;color:var(--danger);margin-top:5px;font-weight:600;display:none}
+.f.has-err input,.f.has-err select{border-color:var(--danger)}
+.f.has-err .err{display:flex;align-items:center;gap:5px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)}
+@media (max-width:520px){.f2{grid-template-columns:1fr}}
+.money{display:flex;gap:var(--s2)}
+.money input{flex:1;min-width:0}
+.money select{width:96px;flex:none}
+.preview{max-width:100%;max-height:180px;border-radius:var(--r1);margin-top:var(--s3);display:block}
+.daypick{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.daypick button{font:inherit;font-size:11px;font-weight:700;min-height:32px;padding:0 9px;border:1px solid var(--border);border-radius:6px;background:var(--surface-2);color:var(--fg-muted);cursor:pointer}
+.daypick button:hover{border-color:var(--brand);color:var(--brand)}
+
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:200;cursor:zoom-out;padding:var(--s4)}
+.lightbox.is-open{display:flex}
+.lightbox img{max-width:96vw;max-height:92vh;border-radius:var(--r1)}
+
+.toast{
+  position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(140%);
+  background:var(--fg);color:var(--bg);padding:12px 18px;border-radius:var(--r-pill);font-size:14px;font-weight:600;
+  z-index:300;transition:transform var(--t);box-shadow:var(--shadow-lg);max-width:calc(100vw - 32px);text-align:center;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+.toast.is-on{transform:translateX(-50%) translateY(0)}
+
+.fab{
+  position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:50;
+  min-height:56px;padding:0 22px;border-radius:var(--r-pill);border:0;background:var(--accent);color:#fff;
+  font:inherit;font-weight:700;font-size:15px;cursor:pointer;box-shadow:var(--shadow-lg);
+  display:none;align-items:center;gap:var(--s2);
+}
+:root[data-theme="dark"] .fab,:root.is-dark .fab{color:#241004}
+.fab svg{width:19px;height:19px}
+@media (max-width:720px){.fab{display:inline-flex}}
+
+footer{text-align:center;color:var(--fg-subtle);font-size:12px;padding:var(--s6) var(--s4)}
+
+/* ---------- login ---------- */
+.login{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:var(--s4);
+  background:radial-gradient(1000px 600px at 20% 10%,#134E4A 0%,#0B1220 55%,#06121C 100%)}
+.login__card{background:var(--surface);border-radius:var(--r3);padding:var(--s8) var(--s6);max-width:420px;width:100%;text-align:center;box-shadow:var(--shadow-lg)}
+.login__mark{width:52px;height:52px;border-radius:15px;background:var(--brand);display:grid;place-items:center;margin:0 auto var(--s4)}
+.login__mark svg{width:27px;height:27px;color:#fff}
+.login__card h1{font-size:20px;margin-bottom:6px}
+.login__card p{color:var(--fg-muted);font-size:14px;margin:0 0 var(--s6)}
+.gbtn{display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:48px;
+  background:var(--surface);color:var(--fg);border:1px solid var(--border-strong);border-radius:var(--r1);
+  font:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:all var(--t)}
+.gbtn:hover{background:var(--surface-2);border-color:var(--brand)}
+.gbtn svg{width:19px;height:19px}
+.login__err{color:var(--danger);font-size:13px;margin-top:var(--s4);min-height:18px;font-weight:600}
+.login__info{color:var(--fg-subtle);font-size:12px;margin-top:var(--s5)}
+.spin{width:16px;height:16px;border:2px solid var(--border-strong);border-top-color:var(--brand);border-radius:50%;animation:sp .8s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
 
-<!-- LOGIN OVERLAY -->
-<div id="loginScreen" class="login-overlay">
-  <div class="login-card">
-    <h1>Gestor de Reservas — Islandia 2026</h1>
-    <div class="sub">Acceso restringido. Iniciá sesión con tu cuenta de Google autorizada.</div>
-    <button id="btnGoogleLogin" class="btn-google">
-      <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20.4H24v7.2h11.3c-1.5 4.2-5.4 7.2-9.3 7.2-6 0-10.8-4.8-10.8-10.8s4.8-10.8 10.8-10.8c2.7 0 5.2 1 7.1 2.7l5.1-5.1C34.6 7.5 29.6 5.4 24 5.4 13.7 5.4 5.4 13.7 5.4 24S13.7 42.6 24 42.6c10.3 0 18.6-7.4 18.6-18.6 0-1.2-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M7.3 14.3l5.9 4.3C14.8 14.7 19 11.4 24 11.4c2.7 0 5.2 1 7.1 2.7l5.1-5.1C34.6 7.5 29.6 5.4 24 5.4 16.3 5.4 9.7 9.4 7.3 14.3z"/><path fill="#4CAF50" d="M24 42.6c5.4 0 10.4-2.1 14.1-5.5l-5.6-4.6c-2 1.5-4.6 2.5-8.5 2.5-3.9 0-8.1-2.9-9.5-7l-5.9 4.5C9.6 38.5 16.2 42.6 24 42.6z"/><path fill="#1976D2" d="M43.6 20.5H42V20.4H24v7.2h11.3c-.7 2-2 3.7-3.7 4.9l5.6 4.6c-.4.4 6.6-4.7 6.6-13.6 0-1.2-.1-2.3-.4-3.5z"/></svg>
+<!-- ================= ICON SPRITE ================= -->
+<svg style="display:none" aria-hidden="true"><defs>
+<g id="i-plane"><path d="M17.8 19.2 16 11l3.5-3.5a2.1 2.1 0 0 0-3-3L13 8 4.8 6.2a1 1 0 0 0-.9 1.7l6 3.4-2.4 2.4-2.2-.6a.8.8 0 0 0-.8 1.3l1.9 1.9 1.9 1.9a.8.8 0 0 0 1.3-.8l-.6-2.2 2.4-2.4 3.4 6a1 1 0 0 0 1.7-.9Z" fill="currentColor"/></g>
+<g id="i-bed"><path d="M2 4v16M2 11h20v9M22 20v-6a3 3 0 0 0-3-3h-9M7 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g id="i-car"><path d="M5 17H3v-5l2-5h14l2 5v5h-2M5 17a2 2 0 1 0 4 0M5 17h4m10 0a2 2 0 1 1-4 0m4 0h-4M4 12h16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g id="i-mtn"><path d="m3 19 6-11 4 7 2-3 6 7H3Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g id="i-fork"><path d="M4 3v6a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V3M6 11v10M15 3c-1.5 1.5-2 3.5-2 5.5 0 1.7.8 2.5 2 2.5v10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g id="i-tag"><path d="M20.6 13.4 12 4.8V4H4v8h.8l8.6 8.6a2 2 0 0 0 2.8 0l4.4-4.4a2 2 0 0 0 0-2.8ZM7.5 8h.01" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g id="i-pin"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2" fill="none"/></g>
+<g id="i-link"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g id="i-hash"><path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+<g id="i-note"><path d="M4 4h16v12l-4 4H4V4Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/><path d="M20 16h-4v4M8 9h8M8 13h5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+<g id="i-search"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" fill="none"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></g>
+<g id="i-plus"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></g>
+<g id="i-cal"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2" fill="none"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></g>
+<g id="i-grid"><rect x="3" y="3" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="2" fill="none"/><rect x="13" y="3" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="2" fill="none"/><rect x="3" y="13" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="2" fill="none"/><rect x="13" y="13" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="2" fill="none"/></g>
+<g id="i-rows"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></g>
+<g id="i-chev"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g id="i-sun"><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="2" fill="none"/><path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></g>
+<g id="i-moon"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/></g>
+<g id="i-copy"><rect x="9" y="9" width="12" height="12" rx="2" stroke="currentColor" stroke-width="2" fill="none"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+<g id="i-edit"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g id="i-trash"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g id="i-down"><path d="M12 3v12M7 11l5 5 5-5M4 21h16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g id="i-warn"><path d="M12 3 2 20h20L12 3Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/><path d="M12 10v4M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></g>
+<g id="i-scale"><path d="M12 3v18M7 21h10M6 7h12M6 7 3 14h6L6 7Zm12 0-3 7h6l-3-7Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g id="i-out"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l-5-5 5-5M5 12h12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g id="i-x"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></g>
+</defs></svg>
+
+<!-- ================= LOGIN ================= -->
+<div id="loginScreen" class="login">
+  <div class="login__card">
+    <div class="login__mark"><svg viewBox="0 0 24 24"><use href="#i-mtn"/></svg></div>
+    <h1>Islandia · 9–23 sep 2026</h1>
+    <p>Gestor de reservas compartido.<br>Acceso restringido a las cuentas autorizadas.</p>
+    <button id="btnGoogleLogin" class="gbtn">
+      <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20.4H24v7.2h11.3c-1.5 4.2-5.4 7.2-9.3 7.2-6 0-10.8-4.8-10.8-10.8s4.8-10.8 10.8-10.8c2.7 0 5.2 1 7.1 2.7l5.1-5.1C34.6 7.5 29.6 5.4 24 5.4 13.7 5.4 5.4 13.7 5.4 24S13.7 42.6 24 42.6c10.3 0 18.6-7.4 18.6-18.6 0-1.2-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M7.3 14.3l5.9 4.3C14.8 14.7 19 11.4 24 11.4c2.7 0 5.2 1 7.1 2.7l5.1-5.1C34.6 7.5 29.6 5.4 24 5.4 16.3 5.4 9.7 9.4 7.3 14.3z"/><path fill="#4CAF50" d="M24 42.6c5.4 0 10.4-2.1 14.1-5.5l-5.6-4.6c-2 1.5-4.6 2.5-8.5 2.5-3.9 0-8.1-2.9-9.5-7l-5.9 4.5C9.6 38.5 16.2 42.6 24 42.6z"/><path fill="#1976D2" d="M43.6 20.5H42V20.4H24v7.2h11.3c-.7 2-2 3.7-3.7 4.9l5.6 4.6c-.4.4 6.6-4.7 6.6-13.6 0-1.2-.1-2.3-.4-3.5z"/></svg>
       Iniciar sesión con Google
     </button>
-    <div id="loginError" class="login-error"></div>
-    <div class="login-info">Solo Giancarlo y Persona 2 tienen acceso.</div>
+    <div id="loginError" class="login__err" role="alert"></div>
+    <div class="login__info">Giancarlo · María Noel</div>
   </div>
 </div>
 
-<!-- MAIN APP -->
-<div id="mainApp" style="display:none">
-<div class="container">
-  <div class="user-bar">
-    <div>
-      Conectado como <span id="userInfo" class="who"></span>
-      <span id="syncStatus" class="sync-status">· Sincronizado</span>
+<!-- ================= APP ================= -->
+<div id="mainApp" hidden>
+
+<header class="appbar">
+  <div class="appbar__in">
+    <div class="brand">
+      <div class="brand__mark"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mtn"/></svg></div>
+      <div class="brand__txt">
+        <h1>Reservas Islandia</h1>
+        <p>9 → 23 septiembre 2026 · 15 días</p>
+      </div>
     </div>
-    <button onclick="logout()">Cerrar sesión</button>
+    <div class="appbar__sp"></div>
+    <span class="chip-user"><span class="dot" id="syncDot"></span><span class="who" id="userInfo"></span></span>
+    <button class="btn btn--ghost btn--icon" id="btnTheme" title="Cambiar tema" aria-label="Cambiar tema claro/oscuro">
+      <svg viewBox="0 0 24 24" aria-hidden="true" id="themeIcon"><use href="#i-moon"/></svg>
+    </button>
+    <button class="btn btn--ghost btn--icon" onclick="logout()" title="Cerrar sesión" aria-label="Cerrar sesión">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-out"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="nextup"></div>
+  <div class="stats" id="stats"></div>
+
+  <details class="panel" id="panelLiq">
+    <summary class="panel__hd" style="list-style:none">
+      <svg viewBox="0 0 24 24" style="width:17px;height:17px;color:var(--accent)" aria-hidden="true"><use href="#i-scale"/></svg>
+      Liquidación con María Noel
+      <svg class="caret" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev"/></svg>
+    </summary>
+    <div class="panel__bd" id="liqBody"></div>
+  </details>
+
+  <div class="bar">
+    <div class="search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-search"/></svg>
+      <label class="sr-only" for="q">Buscar reservas</label>
+      <input type="search" id="q" placeholder="Buscar título, lugar, código o nota…" autocomplete="off">
+    </div>
+    <div class="seg" role="group" aria-label="Modo de vista">
+      <button id="vAgenda" onclick="setView('agenda')" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-cal"/></svg>Agenda</button>
+      <button id="vGrid" onclick="setView('grid')" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-grid"/></svg>Fichas</button>
+      <button id="vTable" onclick="setView('table')" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-rows"/></svg>Tabla</button>
+    </div>
+    <button class="btn btn--primary" onclick="openModal()" id="btnNew"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-plus"/></svg>Nueva</button>
   </div>
 
-  <header>
-    <h1>Gestor de Reservas — Islandia 8 al 23 Sep 2026</h1>
-    <div class="subtitle">Sincronización en tiempo real entre los dos. Cargás algo y aparece al instante en el otro lado.</div>
-  </header>
+  <div class="chips" id="chips" role="group" aria-label="Filtrar por tipo"></div>
 
-  <div class="help-block">
-    <strong>Cómo funciona:</strong> los datos viven en Firebase, ambos los ven en tiempo real. Click <strong>+ Nueva reserva</strong>, completá los campos eligiendo la moneda (ISK / USD / EUR — FX <code>138 ISK/USD</code>, <code>150 ISK/EUR</code>) y opcionalmente subí una foto. Rango de fechas: 8 al 23 de septiembre de 2026. Después usá <strong>Exportar .ics</strong> para subir el cronograma a los Gmail.
-  </div>
+  <div id="content" aria-live="polite"></div>
 
-  <div class="toolbar">
-    <button class="primary" onclick="openModal()">+ Nueva reserva</button>
-    <button class="success" onclick="exportIcs()">Exportar .ics</button>
-    <button onclick="copyExcel()">Copiar para Excel</button>
-    <button onclick="copyJson()">JSON para Claude</button>
-    <button onclick="exportJson()">Backup (JSON)</button>
-    <button onclick="document.getElementById('importInput').click()">Restaurar backup</button>
-    <input type="file" id="importInput" accept=".json" style="display:none" onchange="importJson(event)">
-    <button onclick="migrateLocal()" id="btnMigrate" style="display:none">Subir reservas locales</button>
-  </div>
+  <details class="panel" style="margin-top:var(--s6)">
+    <summary class="panel__hd" style="list-style:none">
+      <svg viewBox="0 0 24 24" style="width:17px;height:17px;color:var(--fg-subtle)" aria-hidden="true"><use href="#i-down"/></svg>
+      Exportar y respaldar
+      <svg class="caret" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev"/></svg>
+    </summary>
+    <div class="panel__bd">
+      <div class="bar" style="margin:0">
+        <button class="btn" onclick="exportIcs()"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-cal"/></svg>Calendario .ics</button>
+        <button class="btn" onclick="copyExcel()"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-copy"/></svg>Copiar para Excel</button>
+        <button class="btn" onclick="copyJson()"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-copy"/></svg>JSON para Claude</button>
+        <button class="btn" onclick="exportJson()"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-down"/></svg>Backup JSON</button>
+        <button class="btn" onclick="document.getElementById('importInput').click()">Restaurar backup</button>
+        <input type="file" id="importInput" accept=".json" hidden onchange="importJson(event)">
+      </div>
+      <p class="hint" style="font-size:12.5px;color:var(--fg-subtle);margin-top:var(--s3)">
+        El .ics usa hora de Reykjavík (UTC+0 todo el año). Cambio aplicado: <strong>124 ISK/USD</strong> · <strong>142 ISK/EUR</strong>.
+      </p>
+    </div>
+  </details>
+</main>
 
-  <div class="summary" id="summary"></div>
+<footer>Islandia sep 2026 · sincronizado en tiempo real vía Firebase · v2</footer>
 
-  <div class="filter-bar">
-    <select id="filterTipo" onchange="render()">
-      <option value="">Todos los tipos</option>
-      <option value="Vuelo">Vuelos</option>
-      <option value="Alojamiento">Alojamientos</option>
-      <option value="Auto">Auto</option>
-      <option value="Tour">Tours / Actividades</option>
-      <option value="Comida">Comidas</option>
-      <option value="Otro">Otros</option>
-    </select>
-    <input type="text" id="filterText" placeholder="Buscar..." oninput="render()">
-    <select id="sortBy" onchange="render()">
-      <option value="fechaInicio">Ordenar por fecha</option>
-      <option value="tipo">Ordenar por tipo</option>
-      <option value="montoIsk">Ordenar por monto</option>
-    </select>
-  </div>
-
-  <div id="cards" class="cards"></div>
+<button class="fab" onclick="openModal()" aria-label="Nueva reserva">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-plus"/></svg>Nueva
+</button>
 </div>
 
-<div id="modalBg" class="modal-bg" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <h2 id="modalTitle">Nueva reserva</h2>
-    <form id="form" onsubmit="saveReserva(event)">
+<!-- ================= MODAL ================= -->
+<div id="modalBg" class="scrim" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="sheet">
+    <div class="sheet__hd">
+      <h2 id="modalTitle">Nueva reserva</h2>
+      <button class="btn btn--ghost btn--icon" style="margin-left:auto" onclick="closeModal()" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-x"/></svg>
+      </button>
+    </div>
+    <form id="form" novalidate onsubmit="saveReserva(event)">
+    <div class="sheet__bd">
       <input type="hidden" id="f_id">
-      <div class="form-grid-2">
-        <div class="form-row">
-          <label>Tipo *</label>
+      <div class="f2">
+        <div class="f"><label for="f_tipo">Tipo <span class="req">*</span></label>
           <select id="f_tipo" required>
-            <option value="Vuelo">Vuelo</option>
-            <option value="Alojamiento">Alojamiento</option>
-            <option value="Auto">Auto / Transfer</option>
-            <option value="Tour" selected>Tour / Actividad</option>
-            <option value="Comida">Comida (reservada)</option>
-            <option value="Otro">Otro</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label>Título *</label>
+            <option value="Vuelo">Vuelo</option><option value="Alojamiento">Alojamiento</option>
+            <option value="Auto">Auto / Transporte</option><option value="Tour" selected>Tour / Actividad</option>
+            <option value="Comida">Comida</option><option value="Otro">Otro</option>
+          </select></div>
+        <div class="f" id="w_titulo"><label for="f_titulo">Título <span class="req">*</span></label>
           <input type="text" id="f_titulo" required placeholder="Ej: Sky Lagoon">
-        </div>
+          <div class="err"><svg viewBox="0 0 24 24" style="width:13px;height:13px"><use href="#i-warn"/></svg><span></span></div></div>
       </div>
 
-      <div class="form-grid-2">
-        <div class="form-row">
-          <label>Fecha y hora inicio (Reykjavík) *</label>
+      <div class="f2">
+        <div class="f" id="w_fi"><label for="f_fechaInicio">Inicio (hora de Islandia) <span class="req">*</span></label>
           <input type="datetime-local" id="f_fechaInicio" required min="2026-09-08T00:00" max="2026-09-23T23:59">
-        </div>
-        <div class="form-row">
-          <label>Fecha y hora fin</label>
+          <div class="daypick" id="daypick"></div>
+          <div class="err"><svg viewBox="0 0 24 24" style="width:13px;height:13px"><use href="#i-warn"/></svg><span></span></div></div>
+        <div class="f" id="w_ff"><label for="f_fechaFin">Fin</label>
           <input type="datetime-local" id="f_fechaFin" min="2026-09-08T00:00" max="2026-09-23T23:59">
-        </div>
+          <div class="hint">Dejalo vacío y se asume 1 hora.</div>
+          <div class="err"><svg viewBox="0 0 24 24" style="width:13px;height:13px"><use href="#i-warn"/></svg><span></span></div></div>
       </div>
 
-      <div class="form-row">
-        <label>Ubicación / Dirección</label>
+      <div class="f"><label for="f_ubicacion">Ubicación</label>
         <input type="text" id="f_ubicacion" placeholder="Ej: Vesturvör 44-48, Kópavogur">
+        <div class="hint">Se convierte en botón "Cómo llegar" en la ficha.</div></div>
+
+      <div class="f2">
+        <div class="f"><label for="f_codigo">Código de reserva</label>
+          <input type="text" id="f_codigo" placeholder="Ej: KTR-91396891" autocapitalize="characters"></div>
+        <div class="f"><label for="f_link">Link</label>
+          <input type="url" id="f_link" placeholder="https://…" inputmode="url"></div>
       </div>
 
-      <div class="form-grid-2">
-        <div class="form-row">
-          <label>Código de reserva</label>
-          <input type="text" id="f_codigo" placeholder="Ej: ABC123">
-        </div>
-        <div class="form-row">
-          <label>Link / URL</label>
-          <input type="url" id="f_link" placeholder="https://...">
-        </div>
-      </div>
-
-      <div class="form-grid-2">
-        <div class="form-row">
-          <label>Monto y moneda</label>
-          <div style="display:flex;gap:6px;">
-            <input type="number" id="f_monto" step="0.01" placeholder="12990" style="flex:1;min-width:0;">
-            <select id="f_moneda" style="width:90px;flex-shrink:0;">
-              <option value="ISK">ISK</option>
-              <option value="USD">USD</option>
-              <option value="EUR">EUR</option>
-            </select>
+      <div class="f2">
+        <div class="f"><label for="f_monto">Monto</label>
+          <div class="money">
+            <input type="number" id="f_monto" step="0.01" min="0" inputmode="decimal" placeholder="0.00" oninput="updateFx()">
+            <label class="sr-only" for="f_moneda">Moneda</label>
+            <select id="f_moneda" onchange="updateFx()"><option value="ISK">ISK</option><option value="USD">USD</option><option value="EUR">EUR</option></select>
           </div>
-        </div>
-        <div class="form-row">
-          <label>Pagó *</label>
-          <select id="f_pago" required>
-            <option value="Giancarlo">Giancarlo</option>
-            <option value="Persona2">Persona 2 (mnpresno)</option>
+          <div class="hint" id="fxHint">Cambio: 124 ISK/USD · 142 ISK/EUR</div></div>
+        <div class="f"><label for="f_estado">Estado del pago</label>
+          <select id="f_estado">
+            <option value="Pagado">Pagado (ya salió de la tarjeta)</option>
+            <option value="Pendiente">Pendiente (se paga allá)</option>
           </select>
-        </div>
+          <div class="hint">Sólo lo <strong>pagado</strong> entra en el saldo firme.</div></div>
       </div>
 
-      <div class="form-grid-2">
-        <div class="form-row">
-          <label>División gasto</label>
+      <div class="f2">
+        <div class="f"><label for="f_pago">Quién pagó <span class="req">*</span></label>
+          <select id="f_pago" required><option value="Giancarlo">Giancarlo</option><option value="Persona2">María Noel</option></select></div>
+        <div class="f"><label for="f_division">Cómo se divide</label>
           <select id="f_division">
-            <option value="50/50">50/50</option>
-            <option value="Solo P1">Solo Giancarlo</option>
-            <option value="Solo P2">Solo Persona 2</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label>Participantes</label>
-          <select id="f_participantes">
-            <option value="Ambos">Ambos</option>
-            <option value="Giancarlo">Solo Giancarlo</option>
-            <option value="Persona2">Solo Persona 2</option>
-          </select>
-        </div>
+            <option value="50/50">50 / 50</option>
+            <option value="Solo P1">100 % Giancarlo</option>
+            <option value="Solo P2">100 % María Noel</option>
+          </select></div>
       </div>
 
-      <div class="form-row">
-        <label>Notas</label>
-        <textarea id="f_notas" placeholder="Ej: Llegar 15 min antes..."></textarea>
-      </div>
+      <div class="f"><label for="f_participantes">Participantes</label>
+        <select id="f_participantes"><option value="Ambos">Ambos</option><option value="Giancarlo">Solo Giancarlo</option><option value="Persona2">Solo María Noel</option></select></div>
 
-      <div class="form-row">
-        <label>Imagen / captura de la confirmación</label>
+      <div class="f"><label for="f_notas">Notas</label>
+        <textarea id="f_notas" placeholder="Punto de encuentro, teléfono, PIN, qué llevar…"></textarea></div>
+
+      <div class="f"><label for="f_imagen">Captura de la confirmación</label>
         <input type="file" id="f_imagen" accept="image/*" onchange="previewImage(event)">
-        <img id="imagePreview" class="image-preview" style="display:none">
-        <input type="hidden" id="f_imagen_data">
-        <button type="button" id="btnRemoveImg" style="display:none; margin-top:6px; font-size:12px;" onclick="removeImage()">Quitar imagen</button>
-      </div>
-
-      <div class="form-actions">
-        <button type="button" onclick="closeModal()">Cancelar</button>
-        <button type="submit" class="primary">Guardar</button>
-      </div>
+        <div class="hint">Máx. 1 MB para que sincronice rápido.</div>
+        <img id="imagePreview" class="preview" hidden alt="Vista previa de la confirmación">
+        <button type="button" class="btn btn--sm btn--danger" id="btnRemoveImg" hidden style="margin-top:var(--s2)" onclick="removeImage()">Quitar imagen</button></div>
+    </div>
+    <div class="sheet__ft">
+      <button type="button" class="btn" onclick="closeModal()">Cancelar</button>
+      <button type="submit" class="btn btn--primary">Guardar</button>
+    </div>
     </form>
   </div>
 </div>
 
-<div id="lightbox" class="lightbox" onclick="this.classList.remove('open')">
-  <img id="lightboxImg">
-</div>
-
-<footer>Islandia Sep 2026 · Sincronizado vía Firebase</footer>
-</div>
+<div id="lightbox" class="lightbox" onclick="this.classList.remove('is-open')"><img id="lightboxImg" alt="Confirmación ampliada"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, browserLocalPersistence, setPersistence } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
+/* === CONFIG — idéntica a la v1, no tocar === */
 const firebaseConfig = {
   apiKey: "AIzaSyCVbjM9LPIitZhHYdDVhi4EwuwRUWSWcjw",
   authDomain: "islandia-2026.firebaseapp.com",
@@ -354,439 +563,494 @@ const firebaseConfig = {
   messagingSenderId: "94222802571",
   appId: "1:94222802571:web:2180079d653b1c69ea7e8e"
 };
-
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
+const auth = getAuth(app); const db = getDatabase(app);
 const provider = new GoogleAuthProvider();
 
-const ALLOWED_EMAILS = ['sandonatog@gmail.com', 'mnpresno@gmail.com'];
-const FX_USD = 138;
-const FX_EUR = 150;
-const TRIP_START = '2026-09-08T00:00';
-const TRIP_END   = '2026-09-23T23:59';
-const STORAGE_KEY = 'islandia_reservas_v1';
+const ALLOWED = ['sandonatog@gmail.com','mnpresno@gmail.com'];
+const FX_USD = 124, FX_EUR = 142;
+const TRIP_START = '2026-09-08T00:00', TRIP_END = '2026-09-23T23:59';
+const D1 = '2026-09-09';
+const CACHE_KEY = 'islandia_cache_v2';
+const LEGACY_KEY = 'islandia_reservas_v1';
 
-let reservas = [];
-let currentUser = null;
+/* Mapa de días — derivado del Itinerario v17 */
+const DIAS = ['Blue Lagoon → Reikiavik','Reikiavik','Skógar (zipline Hveragerði)','Fimmvörðuháls → Skógar','Vík','Vík → Skaftafell','Skaftafell → Höfn','Fiordos del Este → Fáskrúðsfjörður','Egilsstaðir','Mývatn','Húsavík → Akureyri (Hamrar)','Eldborg · Snorrastaðir','Snæfellsnes → Arnarstapi','Arnarstapi → Keflavík','Vuelo de vuelta'];
 
+const TIPOS = {
+  Vuelo:       {ico:'i-plane', c:'#1D4ED8', bg:'#DBEAFE'},
+  Alojamiento: {ico:'i-bed',   c:'#7E22CE', bg:'#F3E8FF'},
+  Auto:        {ico:'i-car',   c:'#B45309', bg:'#FEF3C7'},
+  Tour:        {ico:'i-mtn',   c:'#15803D', bg:'#DCFCE7'},
+  Comida:      {ico:'i-fork',  c:'#BE123C', bg:'#FFE4E6'},
+  Otro:        {ico:'i-tag',   c:'#475569', bg:'#E2E8F0'}
+};
+
+let reservas = [], ajustes = {itemsMN:1965.09, traspasos:4500}, currentUser = null;
+let view = localStorage.getItem('islandia_view') || 'agenda';
+let filterTipo = '', query = '';
+
+/* ---------- tema ---------- */
+const root = document.documentElement;
+function applyTheme(){
+  const pref = localStorage.getItem('islandia_theme') || 'auto';
+  root.dataset.theme = pref;
+  const dark = pref === 'dark' || (pref === 'auto' && matchMedia('(prefers-color-scheme:dark)').matches);
+  root.classList.toggle('is-dark', dark);
+  const ic = document.getElementById('themeIcon');
+  if (ic) ic.innerHTML = '<use href="#' + (dark ? 'i-sun' : 'i-moon') + '"/>';
+}
+document.getElementById('btnTheme').onclick = () => {
+  const pref = localStorage.getItem('islandia_theme') || 'auto';
+  localStorage.setItem('islandia_theme', pref === 'dark' ? 'light' : 'dark');
+  applyTheme();
+};
+matchMedia('(prefers-color-scheme:dark)').addEventListener('change', applyTheme);
+applyTheme();
+
+/* ---------- auth ---------- */
 await setPersistence(auth, browserLocalPersistence);
-
 document.getElementById('btnGoogleLogin').addEventListener('click', async () => {
-  const errEl = document.getElementById('loginError');
-  errEl.textContent = '';
-  try {
-    await signInWithPopup(auth, provider);
-  } catch (e) {
-    errEl.textContent = 'Error: ' + (e.message || e.code);
-  }
+  const e = document.getElementById('loginError'); e.textContent = '';
+  try { await signInWithPopup(auth, provider); }
+  catch (err) { e.textContent = 'Error: ' + (err.message || err.code); }
 });
-
-onAuthStateChanged(auth, async (user) => {
-  if (user && ALLOWED_EMAILS.includes(user.email)) {
+onAuthStateChanged(auth, (user) => setTimeout(() => handleAuth(user), 0));
+async function handleAuth(user){
+  if (user && ALLOWED.includes(user.email)) {
     currentUser = user;
+    document.getElementById('loginScreen').hidden = true;
     document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    document.getElementById('userInfo').textContent = user.email === 'sandonatog@gmail.com' ? 'Giancarlo' : 'Persona 2';
-    attachDataListener();
-    checkLocalMigration();
+    document.getElementById('mainApp').hidden = false;
+    document.getElementById('userInfo').textContent = nombre(user.email);
+    loadCache(); attachData(); attachAjustes(); buildDaypick();
+    setView(view);
   } else if (user) {
     await signOut(auth);
     document.getElementById('loginError').textContent = 'Acceso denegado para ' + user.email;
-    document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('mainApp').style.display = 'none';
   } else {
     currentUser = null;
-    document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('mainApp').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'grid';
+    document.getElementById('mainApp').hidden = true;
   }
-});
-
+}
 window.logout = async () => { await signOut(auth); };
+function nombre(m){ return m === 'sandonatog@gmail.com' ? 'Giancarlo' : (m === 'mnpresno@gmail.com' ? 'María Noel' : ''); }
 
-function attachDataListener() {
-  const reservasRef = ref(db, 'reservas');
-  onValue(reservasRef, (snapshot) => {
-    reservas = [];
-    snapshot.forEach(child => {
-      reservas.push({ ...child.val(), id: child.key });
-    });
-    document.getElementById('syncStatus').textContent = '· Sincronizado';
-    document.getElementById('syncStatus').classList.remove('offline');
+/* ---------- datos ---------- */
+function setSync(state, msg){
+  const d = document.getElementById('syncDot');
+  d.className = 'dot' + (state === 'off' ? ' is-off' : state === 'err' ? ' is-err' : '');
+  d.title = msg || (state === 'ok' ? 'Sincronizado' : state === 'off' ? 'Sin conexión — mostrando copia local' : 'Error de sincronización');
+}
+function loadCache(){
+  try { const c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+    if (c && Array.isArray(c.reservas)) { reservas = c.reservas; setSync('off','Copia local'); render(); } } catch(e){}
+}
+function attachData(){
+  onValue(ref(db,'reservas'), (snap) => {
+    reservas = []; snap.forEach(ch => reservas.push({ ...ch.val(), id: ch.key }));
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ts:Date.now(), reservas})); } catch(e){}
+    setSync('ok'); render();
+  }, (err) => setSync('err', err.message));
+}
+function attachAjustes(){
+  onValue(ref(db,'ajustes/liquidacion'), (snap) => {
+    const v = snap.val(); if (v) ajustes = { ...ajustes, ...v };
     render();
-  }, (err) => {
-    document.getElementById('syncStatus').textContent = '· Error: ' + err.message;
-    document.getElementById('syncStatus').classList.add('offline');
-  });
+  }, () => {});
 }
-
-function checkLocalMigration() {
-  const local = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-  if (local.length > 0) {
-    document.getElementById('btnMigrate').style.display = 'inline-block';
-    document.getElementById('btnMigrate').textContent = 'Subir ' + local.length + ' reservas locales';
-  }
-}
-
-window.migrateLocal = async () => {
-  const local = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-  if (local.length === 0) { alert('No hay reservas locales.'); return; }
-  if (!confirm('Subir ' + local.length + ' reservas de tu navegador a Firebase? Si ya hay reservas con el mismo ID, las pisa.')) return;
-  let count = 0;
-  for (const r of local) {
-    const id = r.id || ('r-' + Date.now() + '-' + Math.random().toString(36).slice(2,7));
-    const data = { ...r };
-    delete data.id;
-    if (data.moneda === undefined) {
-      data.moneda = 'ISK';
-      data.monto = (data.montoIsk !== undefined) ? data.montoIsk : (data.monto || 0);
-      delete data.montoIsk;
-    }
-    await set(ref(db, 'reservas/' + id), data);
-    count++;
-  }
-  alert('Subidas ' + count + ' reservas. Podés borrar las locales si querés (Borrar todo → solo borra las locales, las de Firebase quedan).');
-  document.getElementById('btnMigrate').style.display = 'none';
+window.saveAjustes = async () => {
+  const it = parseFloat(document.getElementById('a_items').value) || 0;
+  const tr = parseFloat(document.getElementById('a_traspasos').value) || 0;
+  ajustes = {itemsMN: it, traspasos: tr};
+  try { await set(ref(db,'ajustes/liquidacion'), ajustes); toast('Liquidación actualizada'); }
+  catch(e){ toast('No se pudo guardar: ' + e.message); }
 };
 
-window.addEventListener('online', () => {
-  document.getElementById('syncStatus').textContent = '· Sincronizado';
-  document.getElementById('syncStatus').classList.remove('offline');
-});
-window.addEventListener('offline', () => {
-  document.getElementById('syncStatus').textContent = '· Sin conexión (cambios pendientes)';
-  document.getElementById('syncStatus').classList.add('offline');
-});
+/* ---------- helpers ---------- */
+const toUsd = (r) => { const m = parseFloat(r.monto)||0; if(!m) return 0;
+  return r.moneda==='USD' ? m : r.moneda==='EUR' ? m*FX_EUR/FX_USD : m/FX_USD; };
+const toIsk = (r) => toUsd(r)*FX_USD;
+const esPagado = (r) => (r.estado || 'Pagado') !== 'Pendiente';
+const nUSD = (n) => '$' + n.toLocaleString('es-UY',{minimumFractionDigits:2,maximumFractionDigits:2});
+const nISK = (n) => Math.round(n).toLocaleString('es-UY') + ' ISK';
+const esc = (s) => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ico = (id,cls) => '<svg viewBox="0 0 24 24" aria-hidden="true"'+(cls?' class="'+cls+'"':'')+'><use href="#'+id+'"/></svg>';
+function dayOf(iso){ if(!iso) return null;
+  const d = Math.round((Date.parse(iso.slice(0,10)) - Date.parse(D1)) / 86400000) + 1;
+  return (d>=1 && d<=15) ? d : null; }
+function fmtFecha(iso, conHora=true){ if(!iso) return '';
+  const D=['dom','lun','mar','mié','jue','vie','sáb'], M=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const d=new Date(iso);
+  return D[d.getDay()]+' '+d.getDate()+' '+M[d.getMonth()] + (conHora ? ' · '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0') : ''); }
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('is-on');
+  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('is-on'),2600); }
+window.copiar = (txt) => navigator.clipboard.writeText(txt).then(()=>toast('Copiado: '+txt)).catch(()=>toast('No se pudo copiar'));
+window.toggleNota = (btn) => { const p=btn.previousElementSibling; p.classList.toggle('clamp');
+  btn.textContent = p.classList.contains('clamp') ? 'Ver más' : 'Ver menos'; };
 
-function getMontoIsk(r) {
-  const m = parseFloat(r.monto) || 0;
-  if (!m) return 0;
-  if (r.moneda === 'USD') return m * FX_USD;
-  if (r.moneda === 'EUR') return m * FX_EUR;
-  return m;
-}
-
-function fmtMontoCard(r) {
-  const m = parseFloat(r.monto) || 0;
-  if (!m) return '—';
-  const isk = getMontoIsk(r);
-  const usd = isk / FX_USD;
-  if (r.moneda === 'USD') return '<strong style="color:#1a3a52">$' + m.toLocaleString('es', {maximumFractionDigits:2}) + ' USD</strong> · ' + Math.round(isk).toLocaleString('es') + ' ISK';
-  if (r.moneda === 'EUR') return '<strong style="color:#1a3a52">€' + m.toLocaleString('es', {maximumFractionDigits:2}) + ' EUR</strong> · ' + Math.round(isk).toLocaleString('es') + ' ISK · $' + Math.round(usd) + ' USD';
-  return '<strong style="color:#1a3a52">' + Math.round(m).toLocaleString('es') + ' ISK</strong> · $' + Math.round(usd) + ' USD';
-}
-
-function fmtFecha(iso) {
-  if (!iso) return '';
-  const d = new Date(iso);
-  const dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-  const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-  return dias[d.getDay()] + ' ' + d.getDate() + ' ' + meses[d.getMonth()] + ' ' + d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
-}
-
-function escapeHtml(s) {
-  return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-function render() {
-  const filterTipo = document.getElementById('filterTipo').value;
-  const filterText = document.getElementById('filterText').value.toLowerCase();
-  const sortBy = document.getElementById('sortBy').value;
-
-  let arr = [...reservas];
-  if (filterTipo) arr = arr.filter(r => r.tipo === filterTipo);
-  if (filterText) arr = arr.filter(r =>
-    (r.titulo||'').toLowerCase().includes(filterText) ||
-    (r.ubicacion||'').toLowerCase().includes(filterText) ||
-    (r.notas||'').toLowerCase().includes(filterText) ||
-    (r.codigo||'').toLowerCase().includes(filterText)
-  );
-  arr.sort((a,b) => {
-    if (sortBy === 'fechaInicio') return (a.fechaInicio||'').localeCompare(b.fechaInicio||'');
-    if (sortBy === 'tipo') return (a.tipo||'').localeCompare(b.tipo||'');
-    if (sortBy === 'montoIsk') return getMontoIsk(b) - getMontoIsk(a);
-    return 0;
+/* ---------- liquidación ---------- */
+function liquidar(soloPagados){
+  let bal = 0, totalCompartido = 0;
+  reservas.forEach(r => {
+    if (soloPagados && !esPagado(r)) return;
+    const u = toUsd(r); if (!u) return;
+    const div = r.division || '50/50';
+    if (div === '50/50'){ totalCompartido += u; bal += (r.pago === 'Persona2' ? -u/2 : u/2); }
+    else if (div === 'Solo P2'){ if (r.pago !== 'Persona2') bal += u; }
+    else if (div === 'Solo P1'){ if (r.pago === 'Persona2') bal -= u; }
   });
+  return { bal, totalCompartido, saldo: bal + (ajustes.itemsMN||0) - (ajustes.traspasos||0) };
+}
+function renderLiq(){
+  const firme = liquidar(true), todo = liquidar(false);
+  const pend = reservas.filter(r => !esPagado(r) && toUsd(r));
+  const el = document.getElementById('liqBody');
+  el.innerHTML =
+  '<table class="ledger"><tbody>' +
+    '<tr><td>Gastos compartidos pagados (50/50)</td><td>'+nUSD(firme.totalCompartido)+'</td></tr>' +
+    '<tr><td>Balance de reservas a favor de Giancarlo</td><td>'+nUSD(firme.bal)+'</td></tr>' +
+    '<tr><td>Ítems 100 % de María Noel pagados por G</td><td>+'+nUSD(ajustes.itemsMN||0)+'</td></tr>' +
+    '<tr><td>Traspasos ya recibidos</td><td class="neg">−'+nUSD(ajustes.traspasos||0)+'</td></tr>' +
+    '<tr class="total"><td>María Noel le debe a Giancarlo</td><td>'+nUSD(firme.saldo)+'</td></tr>' +
+  '</tbody></table>' +
+  (pend.length
+    ? '<div class="note">'+ico('i-warn','')+' <strong>'+pend.length+' reserva(s) marcadas «se paga allá»</strong> quedan fuera del saldo firme: '+
+      pend.map(r=>esc(r.titulo)+' ('+nUSD(toUsd(r))+')').join(' · ')+
+      '. Con ellas incluidas el saldo proyectado sería <strong>'+nUSD(todo.saldo)+'</strong>.</div>'
+    : '') +
+  '<div class="adj">' +
+    '<label for="a_items">Ítems 100 % de ella (pasajes, tramos aéreos)</label><input type="number" step="0.01" id="a_items" value="'+(ajustes.itemsMN||0)+'">' +
+    '<label for="a_traspasos">Traspasos ya recibidos</label><input type="number" step="0.01" id="a_traspasos" value="'+(ajustes.traspasos||0)+'">' +
+    '<span></span><button class="btn btn--sm btn--primary" onclick="saveAjustes()">Guardar ajustes</button>' +
+  '</div>';
+}
 
-  const totalIsk = reservas.reduce((s,r) => s + getMontoIsk(r), 0);
-  const totalUsd = totalIsk / FX_USD;
-  const totalEur = totalIsk / FX_EUR;
-  document.getElementById('summary').innerHTML =
-    '<div><div class="stat-label">Total reservas</div><div class="stat-value">' + reservas.length + '</div></div>' +
-    '<div><div class="stat-label">Total ISK</div><div class="stat-value">' + Math.round(totalIsk).toLocaleString('es') + '</div></div>' +
-    '<div><div class="stat-label">Total USD</div><div class="stat-value">$' + Math.round(totalUsd).toLocaleString('es') + '</div><div class="stat-sub">@ ' + FX_USD + ' ISK/USD</div></div>' +
-    '<div><div class="stat-label">Total EUR</div><div class="stat-value">€' + Math.round(totalEur).toLocaleString('es') + '</div><div class="stat-sub">@ ' + FX_EUR + ' ISK/EUR</div></div>' +
-    '<div><div class="stat-label">Mostrando</div><div class="stat-value">' + arr.length + '</div></div>';
+/* ---------- próximo evento ---------- */
+function renderNext(){
+  const now = Date.now(), el = document.getElementById('nextup');
+  const conFecha = reservas.filter(r=>r.fechaInicio).sort((a,b)=>a.fechaInicio.localeCompare(b.fechaInicio));
+  const enCurso = conFecha.find(r => Date.parse(r.fechaInicio) <= now && r.fechaFin && Date.parse(r.fechaFin) >= now);
+  const prox = conFecha.find(r => Date.parse(r.fechaInicio) > now);
+  const r = enCurso || prox;
+  if (!r){ el.innerHTML=''; return; }
+  const d = dayOf(r.fechaInicio);
+  let cd = '';
+  if (enCurso) cd = '<b>Ahora</b><small>en curso</small>';
+  else {
+    const ms = Date.parse(r.fechaInicio) - now, h = ms/3600000;
+    cd = h < 48 ? '<b>'+Math.round(h)+' h</b><small>faltan</small>'
+                : '<b>'+Math.ceil(h/24)+'</b><small>días</small>';
+  }
+  el.innerHTML = '<div class="nextup"><div>' +
+    '<div class="nextup__k">'+(enCurso?'Sucediendo ahora':'Lo próximo')+(d?' · Día '+d:'')+'</div>' +
+    '<div class="nextup__t">'+esc(r.titulo)+'</div>' +
+    '<div class="nextup__m">'+fmtFecha(r.fechaInicio)+(r.ubicacion?' · '+esc(r.ubicacion):'')+'</div>' +
+    '</div><div class="nextup__cd">'+cd+'</div></div>';
+}
 
-  const cont = document.getElementById('cards');
-  if (arr.length === 0) {
-    cont.innerHTML = '<div class="empty">No hay reservas. Click <strong>+ Nueva reserva</strong> para empezar.</div>';
+/* ---------- stats ---------- */
+function renderStats(){
+  const iskTot = reservas.reduce((s,r)=>s+toIsk(r),0);
+  const usdTot = iskTot/FX_USD;
+  const saldo = liquidar(true).saldo;
+  const pend = reservas.filter(r=>!esPagado(r)&&toUsd(r)).length;
+  document.getElementById('stats').innerHTML =
+    stat('Reservas', reservas.length, pend?pend+' por pagar allá':'todas cargadas') +
+    stat('Total USD', nUSD(usdTot).replace(',00',''), nISK(iskTot)) +
+    stat('Total EUR', '€'+Math.round(iskTot/FX_EUR).toLocaleString('es-UY'), '@ 142 ISK/EUR') +
+    stat('Saldo M. Noel', nUSD(saldo).replace(',00',''), 'a favor de Giancarlo', true);
+}
+const stat = (k,v,s,acc) => '<div class="stat'+(acc?' stat--accent':'')+'"><div class="stat__k">'+k+'</div><div class="stat__v">'+v+'</div><div class="stat__s">'+s+'</div></div>';
+
+/* ---------- chips ---------- */
+function renderChips(){
+  const counts = {}; reservas.forEach(r=>counts[r.tipo]=(counts[r.tipo]||0)+1);
+  let h = '<button class="chip" aria-pressed="'+(filterTipo===''?'true':'false')+'" onclick="setTipo(\'\')">Todos <span class="n">'+reservas.length+'</span></button>';
+  Object.keys(TIPOS).forEach(t=>{ if(!counts[t]) return;
+    h += '<button class="chip" aria-pressed="'+(filterTipo===t?'true':'false')+'" onclick="setTipo(\''+t+'\')">' +
+         '<span class="sw" style="background:'+TIPOS[t].c+'"></span>'+t+' <span class="n">'+counts[t]+'</span></button>'; });
+  document.getElementById('chips').innerHTML = h;
+}
+window.setTipo = (t) => { filterTipo = t; render(); };
+window.setView = (v) => { view = v; localStorage.setItem('islandia_view', v);
+  ['agenda','grid','table'].forEach(k=>{
+    const b=document.getElementById('v'+k[0].toUpperCase()+k.slice(1));
+    if(b) b.setAttribute('aria-pressed', String(k===v)); });
+  render(); };
+document.getElementById('q').addEventListener('input', e => { query = e.target.value.toLowerCase(); render(); });
+
+/* ---------- filtro ---------- */
+function filtradas(){
+  let a = [...reservas];
+  if (filterTipo) a = a.filter(r=>r.tipo===filterTipo);
+  if (query) a = a.filter(r => [r.titulo,r.ubicacion,r.notas,r.codigo].some(v=>String(v||'').toLowerCase().includes(query)));
+  return a.sort((a,b)=>(a.fechaInicio||'').localeCompare(b.fechaInicio||''));
+}
+
+/* ---------- tarjeta ---------- */
+function card(r, hideDay){
+  const T = TIPOS[r.tipo] || TIPOS.Otro;
+  const d = dayOf(r.fechaInicio);
+  const usd = toUsd(r), isk = toIsk(r);
+  const amtMain = r.moneda === 'ISK' ? nISK(isk) : (r.moneda === 'EUR' ? '€'+parseFloat(r.monto).toLocaleString('es-UY',{minimumFractionDigits:2}) : nUSD(usd));
+  const amtSub  = r.moneda === 'ISK' ? nUSD(usd) : nISK(isk);
+  const maps = r.ubicacion ? 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(r.ubicacion) : '';
+  const notaLarga = (r.notas||'').length > 150;
+  return '<article class="card" style="--t-color:'+T.c+';--t-bg:'+T.bg+'">' +
+    '<div class="card__hd">' +
+      '<div class="card__ico">'+ico(T.ico)+'</div>' +
+      '<div class="card__ti"><div class="card__t">'+esc(r.titulo)+'</div>' +
+        '<div class="card__d">'+(d&&!hideDay?'Día '+d+' · ':'')+fmtFecha(r.fechaInicio)+(r.fechaFin?' → '+fmtFecha(r.fechaFin):'')+'</div></div>' +
+      (usd ? '<div class="card__amt"><b>'+amtMain+'</b><small>'+amtSub+'</small></div>' : '') +
+    '</div>' +
+    '<div class="meta">' +
+      '<span class="tag'+(r.pago==='Persona2'?' tag--mn':'')+'">Pagó '+(r.pago==='Persona2'?'M. Noel':'Giancarlo')+'</span>' +
+      '<span class="tag">'+(r.division==='Solo P1'?'100 % G':r.division==='Solo P2'?'100 % MN':'50 / 50')+'</span>' +
+      (!esPagado(r) ? '<span class="tag tag--pend">'+ico('i-warn')+'Se paga allá</span>' : '') +
+    '</div>' +
+    '<div class="rows">' +
+      (r.ubicacion ? '<div class="row">'+ico('i-pin')+'<span>'+esc(r.ubicacion)+' · <a href="'+maps+'" target="_blank" rel="noopener">Cómo llegar</a></span></div>' : '') +
+      (r.codigo ? '<div class="row">'+ico('i-hash')+'<span class="code">'+esc(r.codigo)+'</span> <button class="linkbtn" onclick="copiar(\''+esc(r.codigo).replace(/'/g,"\\'")+'\')">Copiar</button></div>' : '') +
+      (r.link ? '<div class="row">'+ico('i-link')+'<a href="'+esc(r.link)+'" target="_blank" rel="noopener">'+esc(r.link).slice(0,52)+(r.link.length>52?'…':'')+'</a></div>' : '') +
+      (r.notas ? '<div class="row">'+ico('i-note')+'<div style="flex:1"><div class="notes'+(notaLarga?' clamp':'')+'">'+esc(r.notas)+'</div>'+(notaLarga?'<button class="linkbtn" onclick="toggleNota(this)">Ver más</button>':'')+'</div></div>' : '') +
+    '</div>' +
+    (r.imagen ? '<img class="card__img" src="'+r.imagen+'" alt="Confirmación de '+esc(r.titulo)+'" onclick="openLightbox(\''+r.id+'\')">' : '') +
+    '<div class="card__ft">' +
+      '<button class="btn btn--sm" onclick="editReserva(\''+r.id+'\')">'+ico('i-edit')+'Editar</button>' +
+      '<button class="btn btn--sm btn--danger btn--icon" onclick="deleteReserva(\''+r.id+'\')" aria-label="Borrar '+esc(r.titulo)+'">'+ico('i-trash')+'</button>' +
+      (nombre(r.creadoPor) ? '<span class="by">por '+nombre(r.creadoPor)+'</span>' : '') +
+    '</div></article>';
+}
+
+/* ---------- render ---------- */
+function render(){
+  if (!currentUser) return;
+  renderNext(); renderStats(); renderChips(); renderLiq();
+  const arr = filtradas(), c = document.getElementById('content');
+  if (!arr.length){ c.innerHTML = '<div class="empty"><strong>Nada por acá.</strong><br>'+(query||filterTipo?'Probá con otro filtro.':'Tocá «Nueva» para cargar la primera reserva.')+'</div>'; return; }
+
+  if (view === 'table'){
+    c.innerHTML = '<div class="tablewrap"><table class="data"><thead><tr>' +
+      '<th>Día</th><th>Fecha</th><th>Tipo</th><th>Reserva</th><th>Código</th><th class="num">USD</th><th class="num">ISK</th><th>Pagó</th><th>Estado</th></tr></thead><tbody>' +
+      arr.map(r => { const d=dayOf(r.fechaInicio);
+        return '<tr><td>'+(d?'D'+d:'—')+'</td><td>'+fmtFecha(r.fechaInicio)+'</td><td>'+esc(r.tipo)+'</td>' +
+        '<td><strong>'+esc(r.titulo)+'</strong>'+(r.ubicacion?'<br><span style="color:var(--fg-subtle)">'+esc(r.ubicacion)+'</span>':'')+'</td>' +
+        '<td><span class="code">'+esc(r.codigo||'—')+'</span></td>' +
+        '<td class="num">'+(toUsd(r)?nUSD(toUsd(r)):'—')+'</td><td class="num">'+(toIsk(r)?nISK(toIsk(r)):'—')+'</td>' +
+        '<td>'+(r.pago==='Persona2'?'M. Noel':'Giancarlo')+'</td>' +
+        '<td>'+(esPagado(r)?'Pagado':'<strong style="color:var(--warn)">Allá</strong>')+'</td></tr>'; }).join('') +
+      '</tbody></table></div>';
     return;
   }
-  cont.innerHTML = arr.map(r => {
-    const creadoPor = r.creadoPor === 'sandonatog@gmail.com' ? 'Giancarlo' : (r.creadoPor === 'mnpresno@gmail.com' ? 'Persona 2' : '');
-    return '<div class="card">' +
-      '<div class="card-header">' +
-        '<span class="card-tipo tipo-' + r.tipo + '">' + r.tipo + '</span>' +
-      '</div>' +
-      '<div class="card-titulo">' + escapeHtml(r.titulo) + '</div>' +
-      '<div class="card-fecha">' + fmtFecha(r.fechaInicio) + (r.fechaFin?' → '+fmtFecha(r.fechaFin):'') + '</div>' +
-      (r.ubicacion ? '<div class="card-row"><strong>Lugar:</strong> <span>' + escapeHtml(r.ubicacion) + '</span></div>' : '') +
-      (r.codigo ? '<div class="card-row"><strong>Código:</strong> <span>' + escapeHtml(r.codigo) + '</span></div>' : '') +
-      (parseFloat(r.monto) ? '<div class="card-row"><strong>Monto:</strong> <span>' + fmtMontoCard(r) + '</span></div>' : '') +
-      (r.pago ? '<div class="card-row"><strong>Pagó:</strong> <span>' + (r.pago === 'Persona2' ? 'Persona 2' : r.pago) + ' · ' + (r.division||'50/50') + '</span></div>' : '') +
-      (r.notas ? '<div class="card-row"><strong>Notas:</strong> <span style="font-style:italic;color:#666">' + escapeHtml(r.notas) + '</span></div>' : '') +
-      (r.link ? '<div class="card-row"><a class="card-link" href="' + escapeHtml(r.link) + '" target="_blank">' + escapeHtml(r.link).slice(0,60) + (r.link.length>60?'...':'') + '</a></div>' : '') +
-      (r.imagen ? '<img class="card-img" src="' + r.imagen + '" onclick="openLightbox(\'' + r.id + '\')">' : '') +
-      '<div class="card-actions">' +
-        '<button onclick="editReserva(\'' + r.id + '\')">Editar</button>' +
-        '<button class="danger" onclick="deleteReserva(\'' + r.id + '\')">Borrar</button>' +
-        (creadoPor ? '<span class="creado">por ' + creadoPor + '</span>' : '') +
-      '</div>' +
-    '</div>';
+
+  if (view === 'grid'){ c.innerHTML = '<div class="cards">'+arr.map(card).join('')+'</div>'; return; }
+
+  // agenda
+  const hoy = new Date().toISOString().slice(0,10);
+  const grupos = new Map();
+  arr.forEach(r => { const k = (r.fechaInicio||'').slice(0,10) || 'sin'; if(!grupos.has(k)) grupos.set(k,[]); grupos.get(k).push(r); });
+  c.innerHTML = [...grupos.entries()].map(([k,items]) => {
+    if (k === 'sin') return '<section class="day"><div class="day__hd"><span class="day__n">Sin fecha</span><span class="day__line"></span></div><div class="cards cards--list">'+items.map(card).join('')+'</div></section>';
+    const d = dayOf(k+'T00:00');
+    return '<section class="day'+(k===hoy?' day--today':'')+'">' +
+      '<div class="day__hd">' +
+        '<span class="day__n">'+(d?'DÍA '+d:(k==='2026-09-08'?'VÍSPERA':'FUERA DE RUTA'))+(k===hoy?' · HOY':'')+'</span>' +
+        '<span class="day__d">'+fmtFecha(k+'T12:00',false)+'</span>' +
+        '<span class="day__z">'+(d?DIAS[d-1]:(k==='2026-09-08'?'Vuelo de ida · seguro activo':''))+'</span>' +
+        '<span class="day__line"></span>' +
+      '</div><div class="cards cards--list">'+items.map(r=>card(r,true)).join('')+'</div></section>';
   }).join('');
 }
 
-window.openModal = (reserva) => {
-  document.getElementById('modalTitle').textContent = reserva ? 'Editar reserva' : 'Nueva reserva';
-  document.getElementById('f_id').value = reserva ? reserva.id : '';
-  document.getElementById('f_tipo').value = (reserva && reserva.tipo) || 'Tour';
-  document.getElementById('f_titulo').value = (reserva && reserva.titulo) || '';
-  document.getElementById('f_fechaInicio').value = (reserva && reserva.fechaInicio) || '2026-09-09T12:00';
-  document.getElementById('f_fechaFin').value = (reserva && reserva.fechaFin) || '';
-  document.getElementById('f_ubicacion').value = (reserva && reserva.ubicacion) || '';
-  document.getElementById('f_codigo').value = (reserva && reserva.codigo) || '';
-  document.getElementById('f_link').value = (reserva && reserva.link) || '';
-  document.getElementById('f_monto').value = (reserva && reserva.monto) || '';
-  document.getElementById('f_moneda').value = (reserva && reserva.moneda) || 'ISK';
-  document.getElementById('f_pago').value = (reserva && reserva.pago) || 'Giancarlo';
-  document.getElementById('f_division').value = (reserva && reserva.division) || '50/50';
-  document.getElementById('f_participantes').value = (reserva && reserva.participantes) || 'Ambos';
-  document.getElementById('f_notas').value = (reserva && reserva.notas) || '';
-  document.getElementById('f_imagen').value = '';
-  document.getElementById('f_imagen_data').value = (reserva && reserva.imagen) || '';
-  if (reserva && reserva.imagen) {
-    document.getElementById('imagePreview').src = reserva.imagen;
-    document.getElementById('imagePreview').style.display = 'block';
-    document.getElementById('btnRemoveImg').style.display = 'inline-block';
-  } else {
-    document.getElementById('imagePreview').style.display = 'none';
-    document.getElementById('btnRemoveImg').style.display = 'none';
-  }
-  document.getElementById('modalBg').classList.add('open');
+/* ---------- modal ---------- */
+let lastFocus = null;
+function buildDaypick(){
+  const el = document.getElementById('daypick');
+  el.innerHTML = Array.from({length:15},(_,i)=>{
+    const dt = new Date(Date.parse(D1)+i*86400000).toISOString().slice(0,10);
+    return '<button type="button" onclick="pickDay(\''+dt+'\')" title="'+DIAS[i]+'">D'+(i+1)+'</button>';
+  }).join('');
+}
+window.pickDay = (dt) => {
+  const f = document.getElementById('f_fechaInicio');
+  const hora = (f.value.slice(11) || '09:00');
+  f.value = dt + 'T' + hora;
 };
+window.updateFx = () => {
+  const m = parseFloat(document.getElementById('f_monto').value)||0;
+  const cur = document.getElementById('f_moneda').value;
+  const h = document.getElementById('fxHint');
+  if (!m){ h.textContent = 'Cambio: 124 ISK/USD · 142 ISK/EUR'; return; }
+  const usd = cur==='USD'?m:cur==='EUR'?m*FX_EUR/FX_USD:m/FX_USD;
+  h.innerHTML = '≈ <strong>'+nUSD(usd)+'</strong> · '+nISK(usd*FX_USD)+' · €'+Math.round(usd*FX_USD/FX_EUR).toLocaleString('es-UY');
+};
+function clearErrs(){ document.querySelectorAll('.f.has-err').forEach(f=>f.classList.remove('has-err')); }
+function showErr(wrapId, msg){ const w=document.getElementById(wrapId); w.classList.add('has-err');
+  w.querySelector('.err span').textContent = msg; w.querySelector('input,select').focus(); }
 
-window.closeModal = () => { document.getElementById('modalBg').classList.remove('open'); };
+window.openModal = (r) => {
+  lastFocus = document.activeElement;
+  clearErrs();
+  document.getElementById('modalTitle').textContent = r ? 'Editar reserva' : 'Nueva reserva';
+  const v = (id,val) => document.getElementById(id).value = val;
+  v('f_id', r?r.id:''); v('f_tipo', r?.tipo||'Tour'); v('f_titulo', r?.titulo||'');
+  v('f_fechaInicio', r?.fechaInicio||'2026-09-09T12:00'); v('f_fechaFin', r?.fechaFin||'');
+  v('f_ubicacion', r?.ubicacion||''); v('f_codigo', r?.codigo||''); v('f_link', r?.link||'');
+  v('f_monto', r?.monto||''); v('f_moneda', r?.moneda||'ISK'); v('f_estado', r?.estado||'Pagado');
+  v('f_pago', r?.pago||'Giancarlo'); v('f_division', r?.division||'50/50'); v('f_participantes', r?.participantes||'Ambos');
+  v('f_notas', r?.notas||'');
+  document.getElementById('f_imagen').value = '';
+  imgData = r?.imagen || '';
+  const p = document.getElementById('imagePreview'), b = document.getElementById('btnRemoveImg');
+  if (imgData){ p.src = imgData; p.hidden = false; b.hidden = false; } else { p.hidden = true; b.hidden = true; }
+  updateFx();
+  document.getElementById('modalBg').classList.add('is-open');
+  setTimeout(()=>document.getElementById('f_titulo').focus(),40);
+};
+window.closeModal = () => { document.getElementById('modalBg').classList.remove('is-open'); lastFocus?.focus(); };
+document.getElementById('modalBg').addEventListener('click', e => { if (e.target.id==='modalBg') closeModal(); });
+document.addEventListener('keydown', e => { if (e.key==='Escape'){
+  if (document.getElementById('lightbox').classList.contains('is-open')) document.getElementById('lightbox').classList.remove('is-open');
+  else if (document.getElementById('modalBg').classList.contains('is-open')) closeModal(); } });
 
+let imgData = '';
 window.previewImage = (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  if (file.size > 1 * 1024 * 1024) {
-    alert('Imagen muy grande (máx 1 MB para que sincronice rápido en Firebase). Comprimila o sacá un screenshot.');
-    e.target.value = '';
-    return;
-  }
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    document.getElementById('imagePreview').src = ev.target.result;
-    document.getElementById('imagePreview').style.display = 'block';
-    document.getElementById('f_imagen_data').value = ev.target.result;
-    document.getElementById('btnRemoveImg').style.display = 'inline-block';
-  };
-  reader.readAsDataURL(file);
+  const f = e.target.files[0]; if(!f) return;
+  if (f.size > 1024*1024){ toast('Imagen mayor a 1 MB — comprimila o sacá un screenshot'); e.target.value=''; return; }
+  const rd = new FileReader();
+  rd.onload = ev => { imgData = ev.target.result;
+    const p=document.getElementById('imagePreview'); p.src=imgData; p.hidden=false;
+    document.getElementById('btnRemoveImg').hidden=false; };
+  rd.readAsDataURL(f);
 };
-
-window.removeImage = () => {
-  document.getElementById('f_imagen').value = '';
-  document.getElementById('f_imagen_data').value = '';
-  document.getElementById('imagePreview').style.display = 'none';
-  document.getElementById('btnRemoveImg').style.display = 'none';
-};
+window.removeImage = () => { imgData=''; document.getElementById('f_imagen').value='';
+  document.getElementById('imagePreview').hidden=true; document.getElementById('btnRemoveImg').hidden=true; };
 
 window.saveReserva = async (e) => {
-  e.preventDefault();
-  const fi = document.getElementById('f_fechaInicio').value;
-  const ff = document.getElementById('f_fechaFin').value;
-  if (fi && (fi < TRIP_START || fi > TRIP_END)) { alert('Inicio fuera de rango (8-23 sep 2026).'); return; }
-  if (ff && (ff < TRIP_START || ff > TRIP_END)) { alert('Fin fuera de rango (8-23 sep 2026).'); return; }
-  if (fi && ff && ff < fi) { alert('Fin no puede ser anterior al inicio.'); return; }
+  e.preventDefault(); clearErrs();
+  const fi = document.getElementById('f_fechaInicio').value, ff = document.getElementById('f_fechaFin').value;
+  const tit = document.getElementById('f_titulo').value.trim();
+  if (!tit) return showErr('w_titulo','Poné un título.');
+  if (fi && (fi < TRIP_START || fi > TRIP_END)) return showErr('w_fi','Fuera del rango 8–23 sep 2026.');
+  if (ff && (ff < TRIP_START || ff > TRIP_END)) return showErr('w_ff','Fuera del rango 8–23 sep 2026.');
+  if (fi && ff && ff < fi) return showErr('w_ff','El fin no puede ser antes del inicio.');
 
-  const id = document.getElementById('f_id').value || ('r-' + Date.now() + '-' + Math.random().toString(36).slice(2,7));
-  const existing = reservas.find(r => r.id === id);
+  const id = document.getElementById('f_id').value || ('r-'+Date.now()+'-'+Math.random().toString(36).slice(2,7));
+  const ex = reservas.find(x=>x.id===id);
+  const g = (i) => document.getElementById(i).value;
   const data = {
-    tipo: document.getElementById('f_tipo').value,
-    titulo: document.getElementById('f_titulo').value.trim(),
-    fechaInicio: fi,
-    fechaFin: ff || '',
-    ubicacion: document.getElementById('f_ubicacion').value.trim(),
-    codigo: document.getElementById('f_codigo').value.trim(),
-    link: document.getElementById('f_link').value.trim(),
-    moneda: document.getElementById('f_moneda').value,
-    monto: parseFloat(document.getElementById('f_monto').value) || 0,
-    pago: document.getElementById('f_pago').value,
-    division: document.getElementById('f_division').value,
-    participantes: document.getElementById('f_participantes').value,
-    notas: document.getElementById('f_notas').value.trim(),
-    imagen: document.getElementById('f_imagen_data').value || '',
-    creadoPor: existing ? (existing.creadoPor || currentUser.email) : currentUser.email,
-    creadoEn: existing ? (existing.creadoEn || new Date().toISOString()) : new Date().toISOString(),
-    actualizadoPor: currentUser.email,
-    actualizadoEn: new Date().toISOString()
+    tipo:g('f_tipo'), titulo:tit, fechaInicio:fi, fechaFin:ff||'',
+    ubicacion:g('f_ubicacion').trim(), codigo:g('f_codigo').trim(), link:g('f_link').trim(),
+    moneda:g('f_moneda'), monto:parseFloat(g('f_monto'))||0, estado:g('f_estado'),
+    pago:g('f_pago'), division:g('f_division'), participantes:g('f_participantes'),
+    notas:g('f_notas').trim(), imagen:imgData||'',
+    creadoPor: ex?.creadoPor || currentUser.email,
+    creadoEn:  ex?.creadoEn  || new Date().toISOString(),
+    actualizadoPor: currentUser.email, actualizadoEn: new Date().toISOString()
   };
-  try {
-    await set(ref(db, 'reservas/' + id), data);
-    closeModal();
-  } catch (err) {
-    alert('Error guardando: ' + err.message);
-  }
+  try { await set(ref(db,'reservas/'+id), data); closeModal(); toast(ex?'Reserva actualizada':'Reserva agregada'); }
+  catch(err){ toast('Error guardando: '+err.message); }
 };
-
-window.editReserva = (id) => {
-  const r = reservas.find(x => x.id === id);
-  if (r) openModal(r);
-};
-
+window.editReserva = (id) => { const r = reservas.find(x=>x.id===id); if(r) openModal(r); };
 window.deleteReserva = async (id) => {
-  const r = reservas.find(x => x.id === id);
-  if (!r) return;
-  if (!confirm('Borrar la reserva "' + r.titulo + '"? (Se borra para los dos)')) return;
-  try {
-    await remove(ref(db, 'reservas/' + id));
-  } catch (err) {
-    alert('Error borrando: ' + err.message);
-  }
+  const r = reservas.find(x=>x.id===id); if(!r) return;
+  if (!confirm('¿Borrar «'+r.titulo+'»? Se borra para los dos y no se puede deshacer.')) return;
+  try { await remove(ref(db,'reservas/'+id)); toast('Reserva borrada'); }
+  catch(err){ toast('Error borrando: '+err.message); }
 };
-
-window.openLightbox = (id) => {
-  const r = reservas.find(x => x.id === id);
-  if (!r || !r.imagen) return;
+window.openLightbox = (id) => { const r=reservas.find(x=>x.id===id); if(!r?.imagen) return;
   document.getElementById('lightboxImg').src = r.imagen;
-  document.getElementById('lightbox').classList.add('open');
-};
+  document.getElementById('lightbox').classList.add('is-open'); };
 
-function toIcsLocal(iso) {
-  if (!iso) return '';
-  return iso.slice(0,4) + iso.slice(5,7) + iso.slice(8,10) + 'T' + iso.slice(11,13) + iso.slice(14,16) + '00Z';
-}
-function escapeIcs(s) { return String(s||'').replace(/[\\,;]/g, c => '\\'+c).replace(/\n/g, '\\n'); }
-function pad(n) { return String(n).padStart(2, '0'); }
+/* ---------- red ---------- */
+addEventListener('online',  ()=>setSync('ok'));
+addEventListener('offline', ()=>setSync('off'));
+
+/* ---------- export ---------- */
+const pad = n => String(n).padStart(2,'0');
+const toIcs = iso => iso.slice(0,4)+iso.slice(5,7)+iso.slice(8,10)+'T'+iso.slice(11,13)+iso.slice(14,16)+'00Z';
+const escIcs = s => String(s||'').replace(/[\\,;]/g,c=>'\\'+c).replace(/\n/g,'\\n');
 
 window.exportIcs = () => {
-  if (reservas.length === 0) { alert('No hay reservas que exportar.'); return; }
-  const now = new Date();
-  const dtstamp = now.getUTCFullYear() + pad(now.getUTCMonth()+1) + pad(now.getUTCDate()) + 'T' + pad(now.getUTCHours()) + pad(now.getUTCMinutes()) + pad(now.getUTCSeconds()) + 'Z';
-  let ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Islandia Sep 2026//Gestor//ES\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:Islandia Sep 2026\r\nX-WR-TIMEZONE:Atlantic/Reykjavik\r\n';
+  if (!reservas.length) return toast('No hay reservas que exportar');
+  const n = new Date();
+  const stamp = n.getUTCFullYear()+pad(n.getUTCMonth()+1)+pad(n.getUTCDate())+'T'+pad(n.getUTCHours())+pad(n.getUTCMinutes())+pad(n.getUTCSeconds())+'Z';
+  let ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Islandia Sep 2026//Gestor v2//ES\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:Islandia Sep 2026\r\nX-WR-TIMEZONE:Atlantic/Reykjavik\r\n';
   reservas.forEach(r => {
     if (!r.fechaInicio) return;
-    const start = toIcsLocal(r.fechaInicio);
     let end;
-    if (r.fechaFin) end = toIcsLocal(r.fechaFin);
-    else {
-      const d = new Date(r.fechaInicio + ':00Z');
-      d.setHours(d.getHours() + 1);
-      end = d.getUTCFullYear() + pad(d.getUTCMonth()+1) + pad(d.getUTCDate()) + 'T' + pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + '00Z';
-    }
-    const summary = '[' + r.tipo + '] ' + r.titulo;
-    const descParts = [];
-    if (r.codigo) descParts.push('Código: ' + r.codigo);
-    const isk = getMontoIsk(r);
-    if (parseFloat(r.monto)) {
-      let line;
-      if (r.moneda === 'USD') line = 'Monto: $' + parseFloat(r.monto).toLocaleString('es', {maximumFractionDigits:2}) + ' USD (~' + Math.round(isk).toLocaleString('es') + ' ISK)';
-      else if (r.moneda === 'EUR') line = 'Monto: €' + parseFloat(r.monto).toLocaleString('es', {maximumFractionDigits:2}) + ' EUR (~' + Math.round(isk).toLocaleString('es') + ' ISK)';
-      else line = 'Monto: ' + Math.round(parseFloat(r.monto)).toLocaleString('es') + ' ISK (~$' + Math.round(isk/FX_USD) + ' USD)';
-      descParts.push(line);
-    }
-    if (r.pago) descParts.push('Pagó: ' + (r.pago === 'Persona2' ? 'Persona 2' : r.pago));
-    if (r.division) descParts.push('División: ' + r.division);
-    if (r.link) descParts.push('Link: ' + r.link);
-    if (r.notas) descParts.push('Notas: ' + r.notas);
-    ics += 'BEGIN:VEVENT\r\nUID:' + r.id + '@islandia2026\r\nDTSTAMP:' + dtstamp + '\r\nDTSTART:' + start + '\r\nDTEND:' + end + '\r\nSUMMARY:' + escapeIcs(summary) + '\r\n';
-    if (r.ubicacion) ics += 'LOCATION:' + escapeIcs(r.ubicacion) + '\r\n';
-    if (descParts.length) ics += 'DESCRIPTION:' + escapeIcs(descParts.join('\n')) + '\r\n';
-    if (r.link) ics += 'URL:' + escapeIcs(r.link) + '\r\n';
+    if (r.fechaFin) end = toIcs(r.fechaFin);
+    else { const d = new Date(r.fechaInicio+':00Z'); d.setUTCHours(d.getUTCHours()+1);
+      end = d.getUTCFullYear()+pad(d.getUTCMonth()+1)+pad(d.getUTCDate())+'T'+pad(d.getUTCHours())+pad(d.getUTCMinutes())+'00Z'; }
+    const dd = dayOf(r.fechaInicio);
+    const sum = (dd?'D'+dd+' ':'')+'['+r.tipo+'] '+r.titulo;
+    const p = [];
+    if (r.codigo) p.push('Código: '+r.codigo);
+    if (toUsd(r)) p.push('Monto: '+nUSD(toUsd(r))+' (~'+nISK(toIsk(r))+')'+(esPagado(r)?'':' — SE PAGA ALLÁ'));
+    if (r.pago) p.push('Pagó: '+(r.pago==='Persona2'?'María Noel':'Giancarlo')+' · '+(r.division||'50/50'));
+    if (r.link) p.push('Link: '+r.link);
+    if (r.notas) p.push('Notas: '+r.notas);
+    ics += 'BEGIN:VEVENT\r\nUID:'+r.id+'@islandia2026\r\nDTSTAMP:'+stamp+'\r\nDTSTART:'+toIcs(r.fechaInicio)+'\r\nDTEND:'+end+'\r\nSUMMARY:'+escIcs(sum)+'\r\n';
+    if (r.ubicacion) ics += 'LOCATION:'+escIcs(r.ubicacion)+'\r\n';
+    if (p.length) ics += 'DESCRIPTION:'+escIcs(p.join('\n'))+'\r\n';
+    if (r.link) ics += 'URL:'+escIcs(r.link)+'\r\n';
     ics += 'STATUS:CONFIRMED\r\nTRANSP:OPAQUE\r\n';
-    const minBefore = (r.tipo === 'Vuelo' || r.tipo === 'Alojamiento') ? 1440 : 120;
-    ics += 'BEGIN:VALARM\r\nTRIGGER:-PT' + minBefore + 'M\r\nACTION:DISPLAY\r\nDESCRIPTION:' + escapeIcs('Recordatorio: ' + summary) + '\r\nEND:VALARM\r\nEND:VEVENT\r\n';
+    const m = (r.tipo==='Vuelo'||r.tipo==='Alojamiento')?1440:120;
+    ics += 'BEGIN:VALARM\r\nTRIGGER:-PT'+m+'M\r\nACTION:DISPLAY\r\nDESCRIPTION:'+escIcs('Recordatorio: '+sum)+'\r\nEND:VALARM\r\nEND:VEVENT\r\n';
   });
-  ics += 'END:VCALENDAR\r\n';
-  download('islandia_sep2026.ics', ics, 'text/calendar');
+  download('islandia_sep2026.ics', ics+'END:VCALENDAR\r\n', 'text/calendar');
+  toast('Calendario descargado');
 };
 
-function categoriaPara(tipo) {
-  return ({Vuelo:'Transporte', Alojamiento:'Alojamiento', Auto:'Transporte', Tour:'Actividades', Comida:'Comida', Otro:'Otros'})[tipo] || 'Otros';
-}
-
+const categoria = t => ({Vuelo:'Transporte',Alojamiento:'Alojamiento',Auto:'Transporte',Tour:'Actividades',Comida:'Comida',Otro:'Otros'})[t]||'Otros';
 window.copyExcel = () => {
-  if (reservas.length === 0) { alert('No hay reservas.'); return; }
-  const rows = [['Fecha','Categoría','Descripción','Pagó','División','Moneda','Monto']];
-  reservas.filter(r => r.fechaInicio && parseFloat(r.monto))
-    .sort((a,b) => a.fechaInicio.localeCompare(b.fechaInicio))
-    .forEach(r => {
-      const fecha = r.fechaInicio.slice(0,10);
-      const desc = r.titulo + (r.codigo ? ' (#' + r.codigo + ')' : '');
-      const pago = r.pago === 'Persona2' ? 'Persona 2' : 'Giancarlo';
-      rows.push([fecha, categoriaPara(r.tipo), desc, pago, r.division||'50/50', r.moneda||'ISK', r.monto]);
-    });
-  const tsv = rows.map(r => r.join('\t')).join('\n');
-  navigator.clipboard.writeText(tsv).then(() => alert('Copiado ' + (rows.length-1) + ' filas. Recomendado: usar JSON para Claude.')).catch(() => { console.log(tsv); alert('No se pudo copiar.'); });
+  const rows = [['Dia','Fecha','Categoría','Descripción','Pagó','División','Estado','Moneda','Monto','USD']];
+  reservas.filter(r=>r.fechaInicio&&toUsd(r)).sort((a,b)=>a.fechaInicio.localeCompare(b.fechaInicio)).forEach(r=>{
+    const d = dayOf(r.fechaInicio);
+    rows.push([d?'D'+d:'', r.fechaInicio.slice(0,10), categoria(r.tipo), r.titulo+(r.codigo?' (#'+r.codigo+')':''),
+      r.pago==='Persona2'?'María Noel':'Giancarlo', r.division||'50/50', esPagado(r)?'Pagado':'Pendiente',
+      r.moneda||'ISK', r.monto, toUsd(r).toFixed(2)]);
+  });
+  navigator.clipboard.writeText(rows.map(r=>r.join('\t')).join('\n'))
+    .then(()=>toast('Copiadas '+(rows.length-1)+' filas')).catch(()=>toast('No se pudo copiar'));
 };
-
 window.copyJson = () => {
-  if (reservas.length === 0) { alert('No hay reservas.'); return; }
-  const slim = reservas.map(r => Object.assign({}, r, {imagen: r.imagen ? '[imagen guardada en Firebase]' : ''}));
-  const txt = JSON.stringify(slim, null, 2);
-  navigator.clipboard.writeText(txt).then(() => alert('JSON copiado. Pegámelo en el chat.')).catch(() => prompt('Copiá:', txt));
+  const slim = reservas.map(r=>({...r, imagen: r.imagen?'[imagen guardada en Firebase]':''}));
+  navigator.clipboard.writeText(JSON.stringify(slim,null,2)).then(()=>toast('JSON copiado')).catch(()=>toast('No se pudo copiar'));
 };
-
-window.exportJson = () => {
-  const txt = JSON.stringify(reservas, null, 2);
-  const today = new Date().toISOString().slice(0,10);
-  download('islandia_reservas_backup_' + today + '.json', txt, 'application/json');
-};
-
+window.exportJson = () => download('islandia_reservas_backup_'+new Date().toISOString().slice(0,10)+'.json', JSON.stringify(reservas,null,2), 'application/json');
 window.importJson = (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = async (ev) => {
+  const f = e.target.files[0]; if(!f) return;
+  const rd = new FileReader();
+  rd.onload = async ev => {
     try {
       const data = JSON.parse(ev.target.result);
-      if (!Array.isArray(data)) throw new Error('No es un array');
-      if (!confirm('Subir ' + data.length + ' reservas a Firebase? (Las pisa si tienen el mismo ID)')) return;
-      let count = 0;
-      for (const r of data) {
-        const id = r.id || ('r-' + Date.now() + '-' + Math.random().toString(36).slice(2,7));
-        const obj = { ...r };
-        delete obj.id;
-        if (obj.moneda === undefined) {
-          obj.moneda = 'ISK';
-          obj.monto = (obj.montoIsk !== undefined) ? obj.montoIsk : (obj.monto || 0);
-          delete obj.montoIsk;
-        }
-        await set(ref(db, 'reservas/' + id), obj);
-        count++;
+      if (!Array.isArray(data)) throw new Error('El archivo no es una lista de reservas');
+      if (!confirm('¿Subir '+data.length+' reservas? Pisa las que tengan el mismo ID.')) return;
+      for (const r of data){
+        const id = r.id || ('r-'+Date.now()+'-'+Math.random().toString(36).slice(2,7));
+        const o = {...r}; delete o.id;
+        if (o.moneda === undefined){ o.moneda='ISK'; o.monto = o.montoIsk ?? o.monto ?? 0; delete o.montoIsk; }
+        if (o.estado === undefined) o.estado = 'Pagado';
+        await set(ref(db,'reservas/'+id), o);
       }
-      alert('Restauradas ' + count + ' reservas.');
-    } catch (err) {
-      alert('Error: ' + err.message);
-    }
+      toast('Restauradas '+data.length+' reservas');
+    } catch(err){ toast('Error: '+err.message); }
   };
-  reader.readAsText(file);
-  e.target.value = '';
+  rd.readAsText(f); e.target.value='';
 };
-
-function download(filename, content, mime) {
-  const blob = new Blob([content], {type: mime});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 100);
+function download(name, content, mime){
+  const url = URL.createObjectURL(new Blob([content],{type:mime}));
+  const a = document.createElement('a'); a.href=url; a.download=name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),100);
 }
+
+/* migración desde la v1 local, si quedó algo */
+try { const legacy = JSON.parse(localStorage.getItem(LEGACY_KEY)||'[]');
+  if (legacy.length) console.info('Hay '+legacy.length+' reservas en localStorage de la v1 (clave '+LEGACY_KEY+').'); } catch(e){}
 </script>
 </body>
 </html>
